@@ -886,6 +886,729 @@ gitdb.insert_document('users', { name: 'Alice', email: 'alice@example.com' })
 
 ---
 
+## 🔍 Query Execution Examples
+
+### Data Insertion Examples
+
+#### Node.js Data Insertion
+```javascript
+// Using the GitDBClient from above
+const gitdb = new GitDBClient();
+
+// Connect to GitDB
+await gitdb.connect('your_token', 'your_username', 'your_repo');
+
+// Insert single document
+const user = await gitdb.insertDocument('users', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30,
+  city: 'New York',
+  skills: ['JavaScript', 'Node.js', 'React'],
+  profile: {
+    bio: 'Full-stack developer',
+    website: 'https://johndoe.com'
+  },
+  createdAt: new Date()
+});
+
+console.log('Inserted user:', user);
+
+// Insert multiple documents
+const users = [
+  { name: 'Alice Smith', email: 'alice@example.com', age: 25, city: 'San Francisco' },
+  { name: 'Bob Johnson', email: 'bob@example.com', age: 35, city: 'Chicago' },
+  { name: 'Carol Davis', email: 'carol@example.com', age: 28, city: 'Boston' }
+];
+
+for (const userData of users) {
+  const result = await gitdb.insertDocument('users', userData);
+  console.log('Inserted:', result);
+}
+```
+
+#### Python Data Insertion
+```python
+# Using the GitDBClient from above
+gitdb = GitDBClient()
+
+# Connect to GitDB
+gitdb.connect('your_token', 'your_username', 'your_repo')
+
+# Insert single document
+user = gitdb.insert_document('users', {
+    'name': 'John Doe',
+    'email': 'john@example.com',
+    'age': 30,
+    'city': 'New York',
+    'skills': ['Python', 'Django', 'Flask'],
+    'profile': {
+        'bio': 'Backend developer',
+        'website': 'https://johndoe.com'
+    },
+    'created_at': datetime.now()
+})
+
+print('Inserted user:', user)
+
+# Insert multiple documents
+users = [
+    {'name': 'Alice Smith', 'email': 'alice@example.com', 'age': 25, 'city': 'San Francisco'},
+    {'name': 'Bob Johnson', 'email': 'bob@example.com', 'age': 35, 'city': 'Chicago'},
+    {'name': 'Carol Davis', 'email': 'carol@example.com', 'age': 28, 'city': 'Boston'}
+]
+
+for user_data in users:
+    result = gitdb.insert_document('users', user_data)
+    print('Inserted:', result)
+```
+
+#### Java Data Insertion
+```java
+// Using the GitDBClient from above
+GitDBClient gitdb = new GitDBClient();
+
+// Connect to GitDB
+gitdb.connect("your_token", "your_username", "your_repo");
+
+// Insert single document
+Map<String, Object> user = new HashMap<>();
+user.put("name", "John Doe");
+user.put("email", "john@example.com");
+user.put("age", 30);
+user.put("city", "New York");
+user.put("skills", Arrays.asList("Java", "Spring", "Hibernate"));
+user.put("profile", Map.of("bio", "Java developer", "website", "https://johndoe.com"));
+user.put("createdAt", new Date());
+
+String result = gitdb.insertDocument("users", user);
+System.out.println("Inserted user: " + result);
+
+// Insert multiple documents
+List<Map<String, Object>> users = Arrays.asList(
+    Map.of("name", "Alice Smith", "email", "alice@example.com", "age", 25, "city", "San Francisco"),
+    Map.of("name", "Bob Johnson", "email", "bob@example.com", "age", 35, "city", "Chicago"),
+    Map.of("name", "Carol Davis", "email", "carol@example.com", "age", 28, "city", "Boston")
+);
+
+for (Map<String, Object> userData : users) {
+    String insertResult = gitdb.insertDocument("users", userData);
+    System.out.println("Inserted: " + insertResult);
+}
+```
+
+#### C# Data Insertion
+```csharp
+// Using the GitDBClient from above
+var gitdb = new GitDBClient();
+
+// Connect to GitDB
+await gitdb.ConnectAsync("your_token", "your_username", "your_repo");
+
+// Insert single document
+var user = new
+{
+    name = "John Doe",
+    email = "john@example.com",
+    age = 30,
+    city = "New York",
+    skills = new[] { "C#", ".NET", "ASP.NET" },
+    profile = new
+    {
+        bio = "C# developer",
+        website = "https://johndoe.com"
+    },
+    createdAt = DateTime.Now
+};
+
+var result = await gitdb.InsertDocumentAsync("users", user);
+Console.WriteLine($"Inserted user: {result}");
+
+// Insert multiple documents
+var users = new[]
+{
+    new { name = "Alice Smith", email = "alice@example.com", age = 25, city = "San Francisco" },
+    new { name = "Bob Johnson", email = "bob@example.com", age = 35, city = "Chicago" },
+    new { name = "Carol Davis", email = "carol@example.com", age = 28, city = "Boston" }
+};
+
+foreach (var userData in users)
+{
+    var insertResult = await gitdb.InsertDocumentAsync("users", userData);
+    Console.WriteLine($"Inserted: {insertResult}");
+}
+```
+
+#### PHP Data Insertion
+```php
+<?php
+// Using the GitDBClient from above
+$gitdb = new GitDBClient();
+
+// Connect to GitDB
+$gitdb->connect('your_token', 'your_username', 'your_repo');
+
+// Insert single document
+$user = [
+    'name' => 'John Doe',
+    'email' => 'john@example.com',
+    'age' => 30,
+    'city' => 'New York',
+    'skills' => ['PHP', 'Laravel', 'WordPress'],
+    'profile' => [
+        'bio' => 'PHP developer',
+        'website' => 'https://johndoe.com'
+    ],
+    'created_at' => date('Y-m-d H:i:s')
+];
+
+$result = $gitdb->insertDocument('users', $user);
+echo "Inserted user: " . json_encode($result) . "\n";
+
+// Insert multiple documents
+$users = [
+    ['name' => 'Alice Smith', 'email' => 'alice@example.com', 'age' => 25, 'city' => 'San Francisco'],
+    ['name' => 'Bob Johnson', 'email' => 'bob@example.com', 'age' => 35, 'city' => 'Chicago'],
+    ['name' => 'Carol Davis', 'email' => 'carol@example.com', 'age' => 28, 'city' => 'Boston']
+];
+
+foreach ($users as $userData) {
+    $insertResult = $gitdb->insertDocument('users', $userData);
+    echo "Inserted: " . json_encode($insertResult) . "\n";
+}
+?>
+```
+
+#### Go Data Insertion
+```go
+// Using the GitDBClient from above
+gitdb := NewGitDBClient("")
+
+// Connect to GitDB
+gitdb.Connect("your_token", "your_username", "your_repo")
+
+// Insert single document
+user := map[string]interface{}{
+    "name":  "John Doe",
+    "email": "john@example.com",
+    "age":   30,
+    "city":  "New York",
+    "skills": []string{"Go", "Gin", "GORM"},
+    "profile": map[string]interface{}{
+        "bio":     "Go developer",
+        "website": "https://johndoe.com",
+    },
+    "created_at": time.Now(),
+}
+
+result, err := gitdb.InsertDocument("users", user)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Inserted user: %+v\n", result)
+
+// Insert multiple documents
+users := []map[string]interface{}{
+    {"name": "Alice Smith", "email": "alice@example.com", "age": 25, "city": "San Francisco"},
+    {"name": "Bob Johnson", "email": "bob@example.com", "age": 35, "city": "Chicago"},
+    {"name": "Carol Davis", "email": "carol@example.com", "age": 28, "city": "Boston"},
+}
+
+for _, userData := range users {
+    insertResult, err := gitdb.InsertDocument("users", userData)
+    if err != nil {
+        log.Printf("Error inserting user: %v", err)
+        continue
+    }
+    fmt.Printf("Inserted: %+v\n", insertResult)
+}
+```
+
+#### Ruby Data Insertion
+```ruby
+# Using the GitDBClient from above
+gitdb = GitDBClient.new
+
+# Connect to GitDB
+gitdb.connect('your_token', 'your_username', 'your_repo')
+
+# Insert single document
+user = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30,
+  city: 'New York',
+  skills: ['Ruby', 'Rails', 'Sinatra'],
+  profile: {
+    bio: 'Ruby developer',
+    website: 'https://johndoe.com'
+  },
+  created_at: Time.now
+}
+
+result = gitdb.insert_document('users', user)
+puts "Inserted user: #{result}"
+
+# Insert multiple documents
+users = [
+  { name: 'Alice Smith', email: 'alice@example.com', age: 25, city: 'San Francisco' },
+  { name: 'Bob Johnson', email: 'bob@example.com', age: 35, city: 'Chicago' },
+  { name: 'Carol Davis', email: 'carol@example.com', age: 28, city: 'Boston' }
+]
+
+users.each do |user_data|
+  insert_result = gitdb.insert_document('users', user_data)
+  puts "Inserted: #{insert_result}"
+end
+```
+
+### Data Insertion with Error Handling
+
+#### Node.js with Error Handling
+```javascript
+async function insertUserSafely(userData) {
+  try {
+    const result = await gitdb.insertDocument('users', userData);
+    console.log('Successfully inserted:', result);
+    return result;
+  } catch (error) {
+    if (error.response) {
+      console.error('API Error:', error.response.data);
+    } else if (error.request) {
+      console.error('Network Error:', error.message);
+    } else {
+      console.error('Error:', error.message);
+    }
+    throw error;
+  }
+}
+
+// Usage
+await insertUserSafely({
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30
+});
+```
+
+#### Python with Error Handling
+```python
+def insert_user_safely(user_data):
+    try:
+        result = gitdb.insert_document('users', user_data)
+        print('Successfully inserted:', result)
+        return result
+    except requests.exceptions.RequestException as e:
+        print('Network Error:', str(e))
+        raise
+    except Exception as e:
+        print('Error:', str(e))
+        raise
+
+# Usage
+insert_user_safely({
+    'name': 'John Doe',
+    'email': 'john@example.com',
+    'age': 30
+})
+```
+
+### Batch Insertion Examples
+
+#### Node.js Batch Insertion
+```javascript
+async function batchInsert(collection, documents) {
+  const results = [];
+  const errors = [];
+  
+  for (const doc of documents) {
+    try {
+      const result = await gitdb.insertDocument(collection, doc);
+      results.push(result);
+    } catch (error) {
+      errors.push({ document: doc, error: error.message });
+    }
+  }
+  
+  console.log(`Inserted ${results.length} documents successfully`);
+  if (errors.length > 0) {
+    console.log(`${errors.length} documents failed to insert:`, errors);
+  }
+  
+  return { results, errors };
+}
+
+// Usage
+const documents = [
+  { name: 'User 1', email: 'user1@example.com' },
+  { name: 'User 2', email: 'user2@example.com' },
+  { name: 'User 3', email: 'user3@example.com' }
+];
+
+await batchInsert('users', documents);
+```
+
+#### Python Batch Insertion
+```python
+def batch_insert(collection, documents):
+    results = []
+    errors = []
+    
+    for doc in documents:
+        try:
+            result = gitdb.insert_document(collection, doc)
+            results.append(result)
+        except Exception as e:
+            errors.append({'document': doc, 'error': str(e)})
+    
+    print(f"Inserted {len(results)} documents successfully")
+    if errors:
+        print(f"{len(errors)} documents failed to insert: {errors}")
+    
+    return {'results': results, 'errors': errors}
+
+# Usage
+documents = [
+    {'name': 'User 1', 'email': 'user1@example.com'},
+    {'name': 'User 2', 'email': 'user2@example.com'},
+    {'name': 'User 3', 'email': 'user3@example.com'}
+]
+
+batch_insert('users', documents)
+```
+
+### Basic Query Operations
+
+#### Find Documents with Filters
+```javascript
+// Node.js - Find users older than 25
+const users = await gitdb.findDocuments('users', {
+  age: { $gte: 25 }
+});
+
+// Python - Find active users
+users = gitdb.find_documents('users', {
+  'status': 'active',
+  'age': {'$gte': 18}
+});
+
+// Java - Find users by email domain
+String query = "{\"email\": {\"$regex\": \"@gmail.com\"}}";
+String result = gitdb.findDocuments("users", query);
+
+// C# - Find users created in last 30 days
+var query = new { 
+  createdAt = new { $gte = DateTime.Now.AddDays(-30) }
+};
+var users = await gitdb.FindDocumentsAsync("users", query);
+```
+
+#### Complex Queries with Multiple Conditions
+```javascript
+// Node.js - Complex query with AND/OR logic
+const query = {
+  $and: [
+    { age: { $gte: 18, $lte: 65 } },
+    { 
+      $or: [
+        { status: 'active' },
+        { status: 'pending' }
+      ]
+    },
+    { email: { $exists: true } }
+  ]
+};
+
+const results = await gitdb.findDocuments('users', query);
+```
+
+```python
+# Python - Complex query with nested conditions
+query = {
+    '$and': [
+        {'age': {'$gte': 18, '$lte': 65}},
+        {
+            '$or': [
+                {'status': 'active'},
+                {'status': 'pending'}
+            ]
+        },
+        {'email': {'$exists': True}}
+    ]
+}
+
+results = gitdb.find_documents('users', query)
+```
+
+#### Text Search and Pattern Matching
+```javascript
+// Node.js - Text search with regex
+const searchQuery = {
+  $or: [
+    { name: { $regex: 'john', $options: 'i' } },
+    { email: { $regex: 'john', $options: 'i' } },
+    { description: { $regex: 'developer', $options: 'i' } }
+  ]
+};
+
+const searchResults = await gitdb.findDocuments('users', searchQuery);
+```
+
+```python
+# Python - Case-insensitive text search
+search_query = {
+    '$or': [
+        {'name': {'$regex': 'john', '$options': 'i'}},
+        {'email': {'$regex': 'john', '$options': 'i'}},
+        {'description': {'$regex': 'developer', '$options': 'i'}}
+    ]
+}
+
+search_results = gitdb.find_documents('users', search_query)
+```
+
+### Advanced Query Operations
+
+#### Aggregation and Counting
+```javascript
+// Node.js - Count documents with conditions
+const activeUserCount = await gitdb.countDocuments('users', {
+  status: 'active',
+  lastLogin: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+});
+
+// Get distinct values
+const uniqueCities = await gitdb.distinct('users', 'city', {
+  country: 'USA'
+});
+```
+
+```python
+# Python - Count and distinct operations
+active_count = gitdb.count_documents('users', {
+    'status': 'active',
+    'last_login': {'$gte': datetime.now() - timedelta(days=30)}
+})
+
+unique_cities = gitdb.distinct('users', 'city', {
+    'country': 'USA'
+})
+```
+
+#### Pagination and Sorting
+```javascript
+// Node.js - Paginated results with sorting
+const pageSize = 10;
+const page = 1;
+const skip = (page - 1) * pageSize;
+
+const users = await gitdb.findDocuments('users', {}, {
+  sort: { createdAt: -1 },  // -1 for descending, 1 for ascending
+  limit: pageSize,
+  skip: skip
+});
+```
+
+```python
+# Python - Pagination with sorting
+page_size = 10
+page = 1
+skip = (page - 1) * page_size
+
+users = gitdb.find_documents('users', {}, {
+    'sort': {'created_at': -1},  # -1 for descending, 1 for ascending
+    'limit': page_size,
+    'skip': skip
+})
+```
+
+#### Array and Object Queries
+```javascript
+// Node.js - Query array fields
+const query = {
+  // Find users with specific tags
+  tags: { $in: ['developer', 'javascript'] },
+  
+  // Find users with at least 2 skills
+  skills: { $size: { $gte: 2 } },
+  
+  // Find users with specific address
+  'address.city': 'New York',
+  'address.country': 'USA'
+};
+
+const results = await gitdb.findDocuments('users', query);
+```
+
+```python
+# Python - Array and nested object queries
+query = {
+    # Find users with specific tags
+    'tags': {'$in': ['developer', 'javascript']},
+    
+    # Find users with at least 2 skills
+    'skills': {'$size': {'$gte': 2}},
+    
+    # Find users with specific address
+    'address.city': 'New York',
+    'address.country': 'USA'
+}
+
+results = gitdb.find_documents('users', query)
+```
+
+### Query Operators Reference
+
+#### Comparison Operators
+```javascript
+// Equal to
+{ field: value }
+
+// Not equal to
+{ field: { $ne: value } }
+
+// Greater than
+{ field: { $gt: value } }
+
+// Greater than or equal to
+{ field: { $gte: value } }
+
+// Less than
+{ field: { $lt: value } }
+
+// Less than or equal to
+{ field: { $lte: value } }
+
+// In array
+{ field: { $in: [value1, value2, value3] } }
+
+// Not in array
+{ field: { $nin: [value1, value2, value3] } }
+
+// Exists
+{ field: { $exists: true } }
+
+// Does not exist
+{ field: { $exists: false } }
+```
+
+#### Logical Operators
+```javascript
+// AND (implicit)
+{ field1: value1, field2: value2 }
+
+// AND (explicit)
+{ $and: [{ field1: value1 }, { field2: value2 }] }
+
+// OR
+{ $or: [{ field1: value1 }, { field2: value2 }] }
+
+// NOT
+{ $not: { field: value } }
+
+// NOR
+{ $nor: [{ field1: value1 }, { field2: value2 }] }
+```
+
+#### Array Operators
+```javascript
+// Array contains element
+{ array: element }
+
+// Array contains all elements
+{ array: { $all: [element1, element2] } }
+
+// Array size
+{ array: { $size: 3 } }
+
+// Array element at index
+{ 'array.0': value }
+
+// Array element matches condition
+{ array: { $elemMatch: { field: value } } }
+```
+
+### Error Handling Examples
+
+#### Node.js Error Handling
+```javascript
+try {
+  const results = await gitdb.findDocuments('users', {
+    age: { $gte: 18 }
+  });
+  console.log('Found users:', results);
+} catch (error) {
+  if (error.response) {
+    console.error('API Error:', error.response.data);
+  } else if (error.request) {
+    console.error('Network Error:', error.message);
+  } else {
+    console.error('Error:', error.message);
+  }
+}
+```
+
+#### Python Error Handling
+```python
+try:
+    results = gitdb.find_documents('users', {
+        'age': {'$gte': 18}
+    })
+    print('Found users:', results)
+except requests.exceptions.RequestException as e:
+    print('Network Error:', str(e))
+except Exception as e:
+    print('Error:', str(e))
+```
+
+### Performance Tips
+
+#### Optimize Query Performance
+```javascript
+// 1. Use specific field queries instead of regex when possible
+// Good
+{ email: 'john@example.com' }
+
+// Avoid if possible
+{ email: { $regex: 'john@example.com' } }
+
+// 2. Use $exists to check for field presence
+{ field: { $exists: true } }
+
+// 3. Use $in instead of multiple $or conditions
+// Good
+{ status: { $in: ['active', 'pending'] } }
+
+// Less efficient
+{ $or: [{ status: 'active' }, { status: 'pending' }] }
+
+// 4. Limit results for large datasets
+const results = await gitdb.findDocuments('users', query, {
+  limit: 1000
+});
+```
+
+#### Batch Operations
+```javascript
+// Batch insert multiple documents
+const documents = [
+  { name: 'Alice', email: 'alice@example.com' },
+  { name: 'Bob', email: 'bob@example.com' },
+  { name: 'Charlie', email: 'charlie@example.com' }
+];
+
+for (const doc of documents) {
+  await gitdb.insertDocument('users', doc);
+}
+
+// Batch update multiple documents
+const updateQuery = { status: 'inactive' };
+const updateData = { lastUpdated: new Date() };
+await gitdb.updateMany('users', updateQuery, updateData);
+```
+
+---
+
 ## 🔑 Configuration
 
 ### GitHub Token
@@ -1010,7 +1733,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🎉 What's New in v2.0.3
+## 🎉 What's New in v2.0.7
 
 - ✅ **Global npm package** - Install with `npm install -g gitdb-database`
 - ✅ **Node.js 18+ compatibility** - Works with Node.js 18.0.0 and higher
@@ -1021,13 +1744,18 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **REST API** - Full HTTP API support
 - ✅ **Interactive shell** - Easy database management
 - ✅ **GitHub integration** - Store data in GitHub repositories
+- ✅ **Comprehensive query examples** - Multi-language query execution examples
+- ✅ **Advanced query operations** - Complex queries, aggregation, pagination
+- ✅ **Performance optimization tips** - Best practices for efficient queries
+- ✅ **Comprehensive data insertion examples** - Multi-language data insertion with error handling
+- ✅ **Batch insertion operations** - Efficient bulk data insertion patterns
 
 ---
 
 ## 📦 Package Information
 
 - **NPM Package**: [gitdb-database](https://www.npmjs.com/package/gitdb-database)
-- **Version**: 2.0.3
+- **Version**: 2.0.7
 - **Install**: `npm install -g gitdb-database`
 - **Repository**: [karthikeyanV2K/gitdb](https://github.com/karthikeyanV2K/gitdb)
 - **License**: MIT

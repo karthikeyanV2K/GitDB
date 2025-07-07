@@ -1,7 +1,7 @@
 {
   "name": "gitdb-database",
-  "version": "2.0.0",
-  "description": "Production-ready GitHub-backed NoSQL Database with CLI, Shell, and REST API",
+  "version": "2.0.3",
+  "description": "GitHub-backed NoSQL Database with CLI, Shell, and REST API - Store your data in GitHub repositories",
   "main": "dist/main.js",
   "type": "commonjs",
   "bin": {
@@ -29,8 +29,7 @@
     "cli": "node dist/main.js",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "postinstall": "node scripts/postinstall.js",
-    "preuninstall": "node scripts/preuninstall.js",
+
     "publish:npm": "npm publish",
     "publish:npm:beta": "npm publish --tag beta"
   },
@@ -51,10 +50,10 @@
   "author": "GitDB Team",
   "license": "MIT",
   "dependencies": {
-    "@octokit/rest": "^22.0.0",
-    "commander": "^14.0.0",
-    "express": "^5.1.0",
-    "node-windows": "^1.0.0-beta.8"
+    "@octokit/rest": "21.0.2",
+    "commander": "11.1.0",
+    "express": "4.18.2",
+    "node-windows": "1.0.0-beta.8"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
@@ -65,7 +64,8 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "repository": {
     "type": "git",

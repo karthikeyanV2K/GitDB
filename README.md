@@ -6,7 +6,7 @@
 
 ### Install Globally
 ```bash
-npm install -g gitdb
+npm install -g gitdb-database
 ```
 
 ### Use Immediately
@@ -46,20 +46,34 @@ gitdb --help
 
 ### Prerequisites
 - **Node.js** 18.0.0 or higher
-- **npm** (comes with Node.js)
+- **npm** 9.0.0 or higher
 
 ### Global Installation
 ```bash
 # Install globally (recommended)
-npm install -g gitdb
+npm install -g gitdb-database
 
 # The service will be automatically set up
+```
+
+### Platform-Specific Installation
+
+#### Windows
+```bash
+# Run as Administrator if needed
+npm install -g gitdb-database
+```
+
+#### Linux/macOS
+```bash
+# Use sudo for global installation
+sudo npm install -g gitdb-database
 ```
 
 ### Local Installation
 ```bash
 # Install locally (for development)
-npm install gitdb
+npm install gitdb-database
 
 # Run with npx
 npx gitdb --help
@@ -291,7 +305,7 @@ launchctl list | grep gitdb
 ### Permission Issues
 ```bash
 # Linux/macOS: Run with sudo for service installation
-sudo npm install -g gitdb
+sudo npm install -g gitdb-database
 
 # Windows: Run as Administrator
 ```
@@ -374,9 +388,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🎉 What's New in v2.0.0
+## 🎉 What's New in v2.0.3
 
-- ✅ **Global npm package** - Install with `npm install -g gitdb`
+- ✅ **Global npm package** - Install with `npm install -g gitdb-database`
+- ✅ **Node.js 18+ compatibility** - Works with Node.js 18.0.0 and higher
 - ✅ **Automatic service setup** - Works on Windows, Linux, macOS
 - ✅ **Cross-platform commands** - `gitdb`, `gitdb-shell`, `gitdb-server`
 - ✅ **Zero configuration** - Works out of the box
@@ -384,6 +399,16 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - ✅ **REST API** - Full HTTP API support
 - ✅ **Interactive shell** - Easy database management
 - ✅ **GitHub integration** - Store data in GitHub repositories
+
+---
+
+## 📦 Package Information
+
+- **NPM Package**: [gitdb-database](https://www.npmjs.com/package/gitdb-database)
+- **Version**: 2.0.3
+- **Install**: `npm install -g gitdb-database`
+- **Repository**: [karthikeyanV2K/gitdb](https://github.com/karthikeyanV2K/gitdb)
+- **License**: MIT
 
 ---
 

@@ -1,2 +1,0 @@
-2025-07-07 10:08:22 - Starting C:\Program Files\nodejs\node.exe  "X:\git Database\node_modules\node-windows\lib\wrapper.js" --file "X:\git Database\dist\main.js" --scriptoptions=server --log "GitDB wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
-2025-07-07 10:08:22 - Started 24664

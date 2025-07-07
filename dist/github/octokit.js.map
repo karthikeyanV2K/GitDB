@@ -1,0 +1,1 @@
+{"version":3,"file":"octokit.js","sourceRoot":"","sources":["../../src/github/octokit.ts"],"names":[],"mappings":";;AAEA,gCAEC;AAJD,wCAAwC;AAExC,SAAgB,UAAU,CAAC,KAAa;IACtC,OAAO,IAAI,cAAO,CAAC,EAAE,IAAI,EAAE,KAAK,EAAE,CAAC,CAAC;AACtC,CAAC"}

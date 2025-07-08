@@ -8,26 +8,42 @@
 const path = require('path');
 const { spawn } = require('child_process');
 
-// Get the path to the main GitDB application
-const gitdbPath = path.join(__dirname, '..', 'dist', 'main.js');
+// Check if we're running in development or production
+const isDev = process.env.NODE_ENV !== 'production';
+const serverPath = isDev ? 'src/server.ts' : 'dist/server.js';
 
-// Forward server arguments
-const args = process.argv.slice(2);
-const serverArgs = ['server', ...args];
+// Determine the command to run
+const command = isDev ? 'npx' : 'node';
+const args = isDev ? ['ts-node', serverPath] : [serverPath];
 
-// Spawn the GitDB server process
-const child = spawn('node', [gitdbPath, ...serverArgs], {
-    stdio: 'inherit',
-    cwd: path.join(__dirname, '..')
+console.log(`Starting GitDB Server...`);
+console.log(`Mode: ${isDev ? 'Development' : 'Production'}`);
+console.log(`Command: ${command} ${args.join(' ')}`);
+
+// Spawn the server process
+const serverProcess = spawn(command, args, {
+  stdio: 'inherit',
+  cwd: __dirname + '/..'
 });
 
-// Handle process exit
-child.on('close', (code) => {
-    process.exit(code);
+// Handle process events
+serverProcess.on('error', (error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
 
-// Handle process errors
-child.on('error', (err) => {
-    console.error('Error running GitDB Server:', err.message);
-    process.exit(1);
+serverProcess.on('exit', (code) => {
+  console.log(`Server process exited with code ${code}`);
+  process.exit(code);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\nShutting down server...');
+  serverProcess.kill('SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  console.log('\nShutting down server...');
+  serverProcess.kill('SIGTERM');
 }); 

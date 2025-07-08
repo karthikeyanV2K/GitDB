@@ -32,9 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const readline = __importStar(require("readline"));
 const logger_1 = require("./utils/logger");
+const chalk_1 = __importDefault(require("chalk"));
 const logger = (0, logger_1.createLogger)('Shell');
 class GitDBShell {
     constructor() {
@@ -48,7 +52,7 @@ class GitDBShell {
         this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
-            prompt: 'gitdb> '
+            prompt: chalk_1.default.green('[gitdb]> ')
         });
         this.setupEventListeners();
     }
@@ -58,7 +62,7 @@ class GitDBShell {
             this.rl.prompt();
         });
         this.rl.on('close', () => {
-            console.log('\nGoodbye!');
+            console.log(chalk_1.default.yellow('\nGoodbye!'));
             process.exit(0);
         });
     }
@@ -117,11 +121,11 @@ class GitDBShell {
                     this.rl.close();
                     break;
                 default:
-                    console.log(`Unknown command: ${command}. Type 'help' for available commands.`);
+                    console.log(chalk_1.default.red(`Unknown command: ${command}. Type 'help' for available commands.`));
             }
         }
         catch (error) {
-            console.error(`Error: ${error.message}`);
+            console.error(chalk_1.default.red(`Error: ${error.message}`));
             logger.error('Command execution error', { command, error: error.message });
         }
     }
@@ -544,10 +548,11 @@ class GitDBShell {
         console.log('');
     }
     start() {
-        console.log('GitDB Shell v1.0.0');
-        console.log('Type "help" for available commands');
-        console.log(`Connected to server: ${this.state.serverUrl}`);
-        console.log('');
+        console.log(chalk_1.default.bold.green('───────────────────────────────────────────────'));
+        console.log(chalk_1.default.bold.green('   GitDB Shell v1.0.0'));
+        console.log(chalk_1.default.gray('   Type "help" for available commands'));
+        console.log(chalk_1.default.gray('   Connected to server: ') + chalk_1.default.cyan(this.state.serverUrl));
+        console.log(chalk_1.default.bold.green('───────────────────────────────────────────────'));
         this.rl.prompt();
     }
 }

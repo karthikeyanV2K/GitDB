@@ -1,6 +1,6 @@
 {
   "name": "gitdb-database",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "GitHub-backed NoSQL Database with CLI, Shell, and REST API - Store your data in GitHub repositories",
   "main": "dist/main.js",
   "type": "commonjs",

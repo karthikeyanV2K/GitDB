@@ -8,11 +8,11 @@
 const path = require('path');
 const { spawn } = require('child_process');
 
-// Get the path to the main GitDB application
-const gitdbPath = path.join(__dirname, '..', 'dist', 'main.js');
+// Get the path to the shell entry point
+const shellPath = path.join(__dirname, '..', 'dist', 'shell.js');
 
-// Spawn the GitDB shell process
-const child = spawn('node', [gitdbPath, 'shell'], {
+// Spawn the shell process
+const child = spawn('node', [shellPath], {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..')
 });

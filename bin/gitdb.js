@@ -8,14 +8,14 @@
 const path = require('path');
 const { spawn } = require('child_process');
 
-// Get the path to the main GitDB application
-const gitdbPath = path.join(__dirname, '..', 'dist', 'main.js');
+// Get the path to the CLI entry point
+const cliPath = path.join(__dirname, '..', 'dist', 'cli.js');
 
-// Forward all arguments to the main application
+// Forward all arguments to the CLI
 const args = process.argv.slice(2);
 
-// Spawn the main GitDB process
-const child = spawn('node', [gitdbPath, ...args], {
+// Spawn the CLI process
+const child = spawn('node', [cliPath, ...args], {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..')
 });

@@ -1,26 +1,43 @@
-import { Database, Collection, Document } from '../types';
-export declare class GitDatabase {
-    private db;
-    private cache;
-    constructor(name?: string);
-    createCollection(name: string): Collection;
-    getCollection(name: string): Collection | undefined;
-    listCollections(): string[];
-    deleteCollection(name: string): boolean;
-    insert(collectionName: string, document: any): string;
-    find(collectionName: string, id: string): Document | undefined;
-    findOne(collectionName: string, query: any): Document | undefined;
-    findMany(collectionName: string, query?: any): Document[];
-    update(collectionName: string, id: string, updates: any): boolean;
-    updateMany(collectionName: string, query: any, updates: any): number;
-    delete(collectionName: string, id: string): boolean;
-    deleteMany(collectionName: string, query: any): number;
-    count(collectionName: string, query?: any): number;
-    distinct(collectionName: string, field: string, query?: any): any[];
-    private matchesQuery;
-    private getNestedValue;
-    getDatabaseInfo(): Database;
-    clearCache(): void;
-    getCacheSize(): number;
+import { Octokit } from '@octokit/rest';
+export interface DatabaseConfig {
+    token: string;
+    owner: string;
+    repo: string;
 }
+export interface DatabaseConnection {
+    octokit: Octokit;
+    owner: string;
+    repo: string;
+    isConnected: boolean;
+}
+declare class DatabaseManager {
+    private connection;
+    private config;
+    connect(config: DatabaseConfig): Promise<DatabaseConnection>;
+    disconnect(): Promise<void>;
+    getConnection(): DatabaseConnection | null;
+    isConnected(): boolean;
+    ensureConnected(): Promise<DatabaseConnection>;
+    initializeDatabase(): Promise<void>;
+    createCollection(name: string): Promise<void>;
+    listCollections(): Promise<string[]>;
+    deleteCollection(name: string): Promise<void>;
+    createDocument(collection: string, data: any): Promise<any>;
+    readDocument(collection: string, id: string): Promise<any>;
+    updateDocument(collection: string, id: string, data: any): Promise<any>;
+    deleteDocument(collection: string, id: string): Promise<boolean>;
+    listDocuments(collection: string): Promise<string[]>;
+    findDocuments(collection: string, query: any): Promise<any[]>;
+    findOne(collection: string, query: any): Promise<any | null>;
+    find(collection: string, query: any, limit?: number): Promise<any[]>;
+    count(collection: string, query?: any): Promise<number>;
+    updateMany(collection: string, query: any, update: any): Promise<number>;
+    deleteMany(collection: string, query: any): Promise<number>;
+    distinct(collection: string, field: string, query?: any): Promise<any[]>;
+    private generateId;
+    private matchesQuery;
+    private matchesField;
+}
+export declare const databaseManager: DatabaseManager;
+export {};
 //# sourceMappingURL=database.d.ts.map

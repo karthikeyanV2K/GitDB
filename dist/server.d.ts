@@ -1,3 +1,2 @@
-declare const app: any;
-export default app;
+export {};
 //# sourceMappingURL=server.d.ts.map

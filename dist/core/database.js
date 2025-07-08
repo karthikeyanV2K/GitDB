@@ -1,251 +1,399 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GitDatabase = void 0;
-const id_1 = require("../utils/id");
-const logger_1 = require("../utils/logger");
-const logger = (0, logger_1.createLogger)('Database');
-class GitDatabase {
-    constructor(name = 'gitdb') {
-        this.db = {
-            name,
-            collections: new Map(),
-            createdAt: new Date()
-        };
-        this.cache = new Map();
-        logger.info(`Database '${name}' initialized`);
-    }
-    // Collection Management
-    createCollection(name) {
-        if (this.db.collections.has(name)) {
-            throw new Error(`Collection '${name}' already exists`);
+import { Octokit } from '@octokit/rest';
+class DatabaseManager {
+    connection = null;
+    config = null;
+    async connect(config) {
+        try {
+            const octokit = new Octokit({ auth: config.token });
+            // Test the connection by trying to get repo info
+            await octokit.repos.get({
+                owner: config.owner,
+                repo: config.repo
+            });
+            this.connection = {
+                octokit,
+                owner: config.owner,
+                repo: config.repo,
+                isConnected: true
+            };
+            this.config = config;
+            return this.connection;
         }
-        const collection = {
-            name,
-            documents: new Map(),
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-        this.db.collections.set(name, collection);
-        logger.info(`Collection '${name}' created`);
-        return collection;
-    }
-    getCollection(name) {
-        return this.db.collections.get(name);
-    }
-    listCollections() {
-        return Array.from(this.db.collections.keys());
-    }
-    deleteCollection(name) {
-        const deleted = this.db.collections.delete(name);
-        if (deleted) {
-            logger.info(`Collection '${name}' deleted`);
+        catch (error) {
+            throw new Error(`Failed to connect to database: ${error.message}`);
         }
-        return deleted;
     }
-    // Document Operations
-    insert(collectionName, document) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        const id = (0, id_1.generateId)();
-        const doc = {
-            _id: id,
-            ...document,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-        collection.documents.set(id, doc);
-        collection.updatedAt = new Date();
-        this.cache.set(id, doc);
-        logger.info(`Document inserted in collection '${collectionName}' with ID: ${id}`);
-        return id;
+    async disconnect() {
+        this.connection = null;
+        this.config = null;
     }
-    find(collectionName, id) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        // Check cache first
-        const cached = this.cache.get(id);
-        if (cached) {
-            return cached;
-        }
-        const document = collection.documents.get(id);
-        if (document) {
-            this.cache.set(id, document);
-        }
-        return document;
+    getConnection() {
+        return this.connection;
     }
-    findOne(collectionName, query) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        for (const [id, document] of collection.documents) {
-            if (this.matchesQuery(document, query)) {
-                return document;
+    isConnected() {
+        return this.connection?.isConnected || false;
+    }
+    async ensureConnected() {
+        if (!this.connection || !this.connection.isConnected) {
+            if (!this.config) {
+                throw new Error('No database configuration available. Please connect first.');
             }
+            return await this.connect(this.config);
         }
-        return undefined;
+        return this.connection;
     }
-    findMany(collectionName, query) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
+    // Database initialization
+    async initializeDatabase() {
+        const conn = await this.ensureConnected();
+        try {
+            // Create a README file to initialize the repo structure
+            await conn.octokit.repos.createOrUpdateFileContents({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: 'README.md',
+                message: 'Initialize GitDB database',
+                content: Buffer.from('# GitDB Database\n\nThis repository serves as a NoSQL database using Git as storage.\n\n## Collections\n\nCollections are stored as directories, and documents as JSON files.\n').toString('base64')
+            });
         }
-        const documents = [];
-        for (const [id, document] of collection.documents) {
-            if (!query || this.matchesQuery(document, query)) {
-                documents.push(document);
+        catch (error) {
+            // If file already exists, that's fine
+            console.log('Database already initialized');
+        }
+    }
+    // Collection management
+    async createCollection(name) {
+        const conn = await this.ensureConnected();
+        try {
+            await conn.octokit.repos.createOrUpdateFileContents({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: `${name}/.gitkeep`,
+                message: `Create collection: ${name}`,
+                content: Buffer.from('').toString('base64')
+            });
+        }
+        catch (error) {
+            throw new Error(`Failed to create collection ${name}: ${error.message}`);
+        }
+    }
+    async listCollections() {
+        const conn = await this.ensureConnected();
+        try {
+            const { data } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: ''
+            });
+            if (Array.isArray(data)) {
+                return data
+                    .filter(item => item.type === 'dir' && !item.name.startsWith('.'))
+                    .map(item => item.name);
             }
+            return [];
         }
-        return documents;
+        catch (error) {
+            throw new Error(`Failed to list collections: ${error.message}`);
+        }
     }
-    update(collectionName, id, updates) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        const document = collection.documents.get(id);
-        if (!document) {
-            return false;
-        }
-        const updatedDoc = {
-            ...document,
-            ...updates,
-            _id: id, // Preserve the original ID
-            updatedAt: new Date()
-        };
-        collection.documents.set(id, updatedDoc);
-        collection.updatedAt = new Date();
-        this.cache.set(id, updatedDoc);
-        logger.info(`Document ${id} updated in collection '${collectionName}'`);
-        return true;
-    }
-    updateMany(collectionName, query, updates) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        let modifiedCount = 0;
-        for (const [id, document] of collection.documents) {
-            if (this.matchesQuery(document, query)) {
-                const updatedDoc = {
-                    ...document,
-                    ...updates,
-                    _id: id,
-                    updatedAt: new Date()
-                };
-                collection.documents.set(id, updatedDoc);
-                this.cache.set(id, updatedDoc);
-                modifiedCount++;
-            }
-        }
-        if (modifiedCount > 0) {
-            collection.updatedAt = new Date();
-            logger.info(`${modifiedCount} documents updated in collection '${collectionName}'`);
-        }
-        return modifiedCount;
-    }
-    delete(collectionName, id) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        const deleted = collection.documents.delete(id);
-        if (deleted) {
-            this.cache.delete(id);
-            collection.updatedAt = new Date();
-            logger.info(`Document ${id} deleted from collection '${collectionName}'`);
-        }
-        return deleted;
-    }
-    deleteMany(collectionName, query) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        let deletedCount = 0;
-        const toDelete = [];
-        for (const [id, document] of collection.documents) {
-            if (this.matchesQuery(document, query)) {
-                toDelete.push(id);
-            }
-        }
-        for (const id of toDelete) {
-            collection.documents.delete(id);
-            this.cache.delete(id);
-            deletedCount++;
-        }
-        if (deletedCount > 0) {
-            collection.updatedAt = new Date();
-            logger.info(`${deletedCount} documents deleted from collection '${collectionName}'`);
-        }
-        return deletedCount;
-    }
-    count(collectionName, query) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        if (!query) {
-            return collection.documents.size;
-        }
-        let count = 0;
-        for (const [id, document] of collection.documents) {
-            if (this.matchesQuery(document, query)) {
-                count++;
-            }
-        }
-        return count;
-    }
-    distinct(collectionName, field, query) {
-        const collection = this.getCollection(collectionName);
-        if (!collection) {
-            throw new Error(`Collection '${collectionName}' not found`);
-        }
-        const values = new Set();
-        for (const [id, document] of collection.documents) {
-            if (!query || this.matchesQuery(document, query)) {
-                const value = this.getNestedValue(document, field);
-                if (value !== undefined) {
-                    values.add(value);
+    async deleteCollection(name) {
+        const conn = await this.ensureConnected();
+        try {
+            // Get all files in the collection
+            const { data } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: name
+            });
+            if (Array.isArray(data)) {
+                // Delete all files in the collection
+                for (const file of data) {
+                    if (file.type === 'file') {
+                        await conn.octokit.repos.deleteFile({
+                            owner: conn.owner,
+                            repo: conn.repo,
+                            path: file.path,
+                            message: `Delete file from collection ${name}`,
+                            sha: file.sha
+                        });
+                    }
                 }
             }
         }
-        return Array.from(values);
+        catch (error) {
+            throw new Error(`Failed to delete collection ${name}: ${error.message}`);
+        }
     }
-    // Utility Methods
+    // Document operations
+    async createDocument(collection, data) {
+        const conn = await this.ensureConnected();
+        const id = data._id || this.generateId();
+        const path = `${collection}/${id}.json`;
+        try {
+            const documentData = { _id: id, ...data, createdAt: new Date().toISOString() };
+            const content = Buffer.from(JSON.stringify(documentData, null, 2)).toString('base64');
+            // Try to create the file, retry if SHA error occurs
+            try {
+                await conn.octokit.repos.createOrUpdateFileContents({
+                    owner: conn.owner,
+                    repo: conn.repo,
+                    path,
+                    message: `Create document ${id} in ${collection}`,
+                    content
+                });
+            }
+            catch (error) {
+                // If error is a SHA mismatch, fetch the latest SHA and retry
+                if (error?.message && error.message.includes('expected')) {
+                    // Fetch the latest file SHA (if file exists)
+                    let sha = undefined;
+                    try {
+                        const { data: fileData } = await conn.octokit.repos.getContent({
+                            owner: conn.owner,
+                            repo: conn.repo,
+                            path
+                        });
+                        if ('sha' in fileData)
+                            sha = fileData.sha;
+                    }
+                    catch { }
+                    await conn.octokit.repos.createOrUpdateFileContents({
+                        owner: conn.owner,
+                        repo: conn.repo,
+                        path,
+                        message: `Create document ${id} in ${collection} (retry)`,
+                        content,
+                        sha
+                    });
+                }
+                else {
+                    throw error;
+                }
+            }
+            return documentData;
+        }
+        catch (error) {
+            throw new Error(`Failed to create document: ${error.message}`);
+        }
+    }
+    async readDocument(collection, id) {
+        const conn = await this.ensureConnected();
+        const path = `${collection}/${id}.json`;
+        try {
+            const { data } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path
+            });
+            if ('content' in data && typeof data.content === 'string') {
+                return JSON.parse(Buffer.from(data.content, 'base64').toString());
+            }
+            throw new Error('Invalid document format');
+        }
+        catch (error) {
+            throw new Error(`Failed to read document ${id}: ${error.message}`);
+        }
+    }
+    async updateDocument(collection, id, data) {
+        const conn = await this.ensureConnected();
+        const path = `${collection}/${id}.json`;
+        try {
+            // Get current file to get SHA
+            const { data: fileData } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path
+            });
+            if (!('sha' in fileData) || !('content' in fileData)) {
+                throw new Error('Document not found');
+            }
+            const currentData = JSON.parse(Buffer.from(fileData.content, 'base64').toString());
+            const updatedData = {
+                ...currentData,
+                ...data,
+                _id: id,
+                updatedAt: new Date().toISOString()
+            };
+            const content = Buffer.from(JSON.stringify(updatedData, null, 2)).toString('base64');
+            await conn.octokit.repos.createOrUpdateFileContents({
+                owner: conn.owner,
+                repo: conn.repo,
+                path,
+                message: `Update document ${id} in ${collection}`,
+                content,
+                sha: fileData.sha
+            });
+            return updatedData;
+        }
+        catch (error) {
+            throw new Error(`Failed to update document ${id}: ${error.message}`);
+        }
+    }
+    async deleteDocument(collection, id) {
+        const conn = await this.ensureConnected();
+        const path = `${collection}/${id}.json`;
+        try {
+            const { data: fileData } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path
+            });
+            if (!('sha' in fileData)) {
+                throw new Error('Document not found');
+            }
+            await conn.octokit.repos.deleteFile({
+                owner: conn.owner,
+                repo: conn.repo,
+                path,
+                message: `Delete document ${id} from ${collection}`,
+                sha: fileData.sha
+            });
+            return true;
+        }
+        catch (error) {
+            throw new Error(`Failed to delete document ${id}: ${error.message}`);
+        }
+    }
+    async listDocuments(collection) {
+        const conn = await this.ensureConnected();
+        try {
+            const { data } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: collection
+            });
+            if (Array.isArray(data)) {
+                return data
+                    .filter(item => item.type === 'file' && item.name.endsWith('.json'))
+                    .map(item => item.name.replace('.json', ''));
+            }
+            return [];
+        }
+        catch (error) {
+            throw new Error(`Failed to list documents in ${collection}: ${error.message}`);
+        }
+    }
+    async findDocuments(collection, query) {
+        const conn = await this.ensureConnected();
+        const documents = [];
+        try {
+            const { data } = await conn.octokit.repos.getContent({
+                owner: conn.owner,
+                repo: conn.repo,
+                path: collection
+            });
+            if (Array.isArray(data)) {
+                for (const file of data) {
+                    if (file.type === 'file' && file.name.endsWith('.json')) {
+                        const document = await this.readDocument(collection, file.name.replace('.json', ''));
+                        if (this.matchesQuery(document, query)) {
+                            documents.push(document);
+                        }
+                    }
+                }
+            }
+            return documents;
+        }
+        catch (error) {
+            throw new Error(`Failed to find documents in ${collection}: ${error.message}`);
+        }
+    }
+    // MongoDB-style findOne - returns first matching document
+    async findOne(collection, query) {
+        const documents = await this.findDocuments(collection, query);
+        return documents.length > 0 ? documents[0] : null;
+    }
+    // MongoDB-style find with limit
+    async find(collection, query, limit) {
+        const documents = await this.findDocuments(collection, query);
+        return limit ? documents.slice(0, limit) : documents;
+    }
+    // MongoDB-style count
+    async count(collection, query = {}) {
+        const documents = await this.findDocuments(collection, query);
+        return documents.length;
+    }
+    // MongoDB-style updateMany
+    async updateMany(collection, query, update) {
+        const documents = await this.findDocuments(collection, query);
+        let updatedCount = 0;
+        for (const doc of documents) {
+            try {
+                await this.updateDocument(collection, doc._id, update);
+                updatedCount++;
+            }
+            catch (error) {
+                console.error(`Failed to update document ${doc._id}: ${error}`);
+            }
+        }
+        return updatedCount;
+    }
+    // MongoDB-style deleteMany
+    async deleteMany(collection, query) {
+        const documents = await this.findDocuments(collection, query);
+        let deletedCount = 0;
+        for (const doc of documents) {
+            try {
+                await this.deleteDocument(collection, doc._id);
+                deletedCount++;
+            }
+            catch (error) {
+                console.error(`Failed to delete document ${doc._id}: ${error}`);
+            }
+        }
+        return deletedCount;
+    }
+    // MongoDB-style distinct
+    async distinct(collection, field, query = {}) {
+        const documents = await this.findDocuments(collection, query);
+        const values = documents.map(doc => doc[field]).filter(value => value !== undefined);
+        return [...new Set(values)];
+    }
+    generateId() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
     matchesQuery(document, query) {
         for (const [key, value] of Object.entries(query)) {
-            const docValue = this.getNestedValue(document, key);
-            if (docValue !== value) {
+            if (!this.matchesField(document[key], value)) {
                 return false;
             }
         }
         return true;
     }
-    getNestedValue(obj, path) {
-        return path.split('.').reduce((current, key) => {
-            return current && current[key] !== undefined ? current[key] : undefined;
-        }, obj);
-    }
-    // Database Info
-    getDatabaseInfo() {
-        return {
-            ...this.db,
-            collections: new Map(this.db.collections) // Return a copy
-        };
-    }
-    // Cache Management
-    clearCache() {
-        this.cache.clear();
-        logger.info('Cache cleared');
-    }
-    getCacheSize() {
-        return this.cache.size;
+    matchesField(documentValue, queryValue) {
+        // Handle different query operators
+        if (typeof queryValue === 'object' && queryValue !== null) {
+            for (const [operator, operatorValue] of Object.entries(queryValue)) {
+                switch (operator) {
+                    case '$eq':
+                        return documentValue === operatorValue;
+                    case '$ne':
+                        return documentValue !== operatorValue;
+                    case '$gt':
+                        return documentValue > operatorValue;
+                    case '$gte':
+                        return documentValue >= operatorValue;
+                    case '$lt':
+                        return documentValue < operatorValue;
+                    case '$lte':
+                        return documentValue <= operatorValue;
+                    case '$in':
+                        return Array.isArray(operatorValue) && operatorValue.includes(documentValue);
+                    case '$nin':
+                        return Array.isArray(operatorValue) && !operatorValue.includes(documentValue);
+                    case '$regex':
+                        return typeof documentValue === 'string' &&
+                            new RegExp(operatorValue).test(documentValue);
+                    case '$exists':
+                        return operatorValue ? documentValue !== undefined : documentValue === undefined;
+                    default:
+                        return false;
+                }
+            }
+        }
+        // Simple equality match
+        return documentValue === queryValue;
     }
 }
-exports.GitDatabase = GitDatabase;
+// Export singleton instance
+export const databaseManager = new DatabaseManager();
 //# sourceMappingURL=database.js.map

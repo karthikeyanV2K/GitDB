@@ -1,270 +1,176 @@
-# GitDB
+# GitDB - GitHub-Backed NoSQL Database
 
-📦 **GitDB** - GitHub-backed NoSQL Database available as a global npm package
+A production-ready CLI tool and API server for managing a NoSQL database using GitHub repositories as storage. Features both command-line interface and REST API with interactive shell.
+
+---
 
 ## 🚀 Quick Start
 
-### Install Globally
+### 1. Install Dependencies
 ```bash
-npm install -g gitdb-database
+npm install
 ```
 
-### Use Immediately
+### 2. Build the Project
 ```bash
-# Interactive shell
-gitdb shell
+npm run build
+```
 
-# Start server
-gitdb server
+### 3. Set Up Your GitHub Credentials
+You need a GitHub personal access token with repo permissions. You can set credentials via:
+- Environment variables: `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`
+- API calls to connect endpoint
+- CLI commands
 
-# Show help
-gitdb --help
+### 4. Start the API Server
+```bash
+npm start
+# or for development
+npm run dev
+```
+
+The server will start on port 7896 by default.
+
+---
+
+## 🐚 Interactive Shell
+
+Start the interactive shell for database operations:
+
+```bash
+npm run shell
+# or directly
+node dist/shell.js
+```
+
+### Shell Commands
+```
+🔗 Connection:
+  connect <token> <owner> <repo>  Connect to database
+  disconnect                     Disconnect from database
+  status                         Show connection status
+
+📁 Collections:
+  collections                    List all collections
+  create-collection <name>       Create a new collection
+  delete-collection <name>       Delete a collection
+  use <collection>               Set current collection
+
+📄 Documents:
+  docs                           List documents in current collection
+  insert <json>                  Insert a new document
+  find <id>                      Find document by ID
+  update <id> <json>             Update document by ID
+  delete <id>                    Delete document by ID
+
+🛠️  Utility:
+  clear                          Clear screen
+  help                           Show this help
+  exit, quit                     Exit shell
+```
+
+### Example Shell Session
+```
+🚀 GitDB Shell - GitHub-backed NoSQL Database
+gitdb> connect your_token your_username your_repo
+✅ Connected to database: your_username/your_repo
+gitdb> create-collection users
+✅ Collection 'users' created successfully
+gitdb> use users
+📁 Using collection: users
+gitdb> insert {"name":"Alice","email":"alice@example.com"}
+✅ Document created with ID: abc123def456
+gitdb> find abc123def456
+{
+  "_id": "abc123def456",
+  "name": "Alice",
+  "email": "alice@example.com",
+  "createdAt": "2024-01-01T12:00:00.000Z"
+}
+gitdb> update abc123def456 {"email":"alice@new.com"}
+✅ Document updated successfully
+gitdb> docs
+📄 Documents in 'users':
+  - abc123def456
+gitdb> exit
+👋 Goodbye!
 ```
 
 ---
 
-## 📋 Features
+## 🖥️ Command Line Interface
 
-### ✅ **Automatic Service Setup**
-- **Windows**: Creates Windows Service (auto-starts with system)
-- **Linux**: Creates systemd service (auto-starts with system)
-- **macOS**: Creates launchd service (auto-starts with system)
+Use the CLI for scripting and automation:
 
-### ✅ **Cross-Platform Commands**
-- `gitdb` - Main CLI with all commands
-- `gitdb-shell` - Direct shell access
-- `gitdb-server` - Direct server access
-
-### ✅ **Zero Configuration**
-- Works out of the box
-- Automatic service management
-- No manual setup required
-
----
-
-## 🛠️ Installation
-
-### Prerequisites
-- **Node.js** 18.0.0 or higher
-- **npm** 9.0.0 or higher
-
-### Global Installation
 ```bash
-# Install globally (recommended)
-npm install -g gitdb-database
-
-# The service will be automatically set up
-```
-
-### Platform-Specific Installation
-
-#### Windows
-```bash
-# Run as Administrator if needed
-npm install -g gitdb-database
-```
-
-#### Linux/macOS
-```bash
-# Use sudo for global installation
-sudo npm install -g gitdb-database
-```
-
-### Local Installation
-```bash
-# Install locally (for development)
-npm install gitdb-database
-
-# Run with npx
-npx gitdb --help
-```
-
----
-
-## 🎯 Usage
-
-### Interactive Shell
-```bash
-# Start interactive shell
-gitdb shell
-
-# Or use direct command
-gitdb-shell
-```
-
-### Server Mode
-```bash
-# Start server
-gitdb server
-
-# Or use direct command
-gitdb-server
-
-# Server will be available at http://localhost:7896
+npm run cli
+# or directly
+node dist/cli.js
 ```
 
 ### CLI Commands
 ```bash
-# Show help
-gitdb --help
+# Connect to database
+gitdb connect -t <token> -o <owner> -r <repo>
 
-# Set GitHub token
-gitdb set token YOUR_GITHUB_TOKEN
+# List collections
+gitdb collections
 
-# Set repository
-gitdb set owner YOUR_USERNAME
-gitdb set repo YOUR_REPO_NAME
+# Create collection
+gitdb create-collection <name>
 
-# Use collection
-gitdb use collection_name
+# Delete collection
+gitdb delete-collection <name>
 
-# Insert document
-gitdb insert '{"name": "test", "value": 123}'
+# List documents in collection
+gitdb documents <collection>
 
-# Find documents
-gitdb findone '{"name": "test"}'
-gitdb find document_id
+# Create document
+gitdb create-doc <collection> '{"name":"John","email":"john@example.com"}'
+
+# Read document
+gitdb read-doc <collection> <id>
 
 # Update document
-gitdb update document_id '{"name": "updated"}'
+gitdb update-doc <collection> <id> '{"email":"john@new.com"}'
 
 # Delete document
-gitdb delete document_id
-```
+gitdb delete-doc <collection> <id>
 
----
+# Find documents by query
+gitdb find <collection> '{"name":"John"}'
 
-## 🔧 Service Management
-
-### Windows
-```bash
-# Service is automatically installed and started
-# Check service status
-sc query GitDB
-
-# Stop service
-sc stop GitDB
-
-# Start service
-sc start GitDB
-
-# Remove service (if needed)
-sc delete GitDB
-```
-
-### Linux
-```bash
-# Service is automatically installed and started
-# Check service status
-sudo systemctl status gitdb
-
-# Stop service
-sudo systemctl stop gitdb
-
-# Start service
-sudo systemctl start gitdb
-
-# Enable/disable auto-start
-sudo systemctl enable gitdb
-sudo systemctl disable gitdb
-```
-
-### macOS
-```bash
-# Service is automatically installed and started
-# Check service status
-launchctl list | grep gitdb
-
-# Stop service
-launchctl unload ~/Library/LaunchAgents/com.gitdb.server.plist
-
-# Start service
-launchctl load ~/Library/LaunchAgents/com.gitdb.server.plist
-```
-
----
-
-## 🗂️ Collections & Documents
-
-### Create Collection
-```bash
-gitdb create-collection users
-```
-
-### Insert Document
-```bash
-gitdb insert '{"name": "John Doe", "email": "john@example.com", "age": 30}'
-```
-
-### Find Documents
-```bash
-# Find by ID
-gitdb find abc123
-
-# Find by query
-gitdb findone '{"name": "John Doe"}'
-
-# Count documents
-gitdb count '{"age": {"$gte": 25}}'
-```
-
-### Update Documents
-```bash
-# Update single document
-gitdb update abc123 '{"age": 31}'
-
-# Update multiple documents
-gitdb updatemany '{"age": {"$lt": 30}}' '{"status": "young"}'
-```
-
-### Delete Documents
-```bash
-# Delete single document
-gitdb delete abc123
-
-# Delete multiple documents
-gitdb deletemany '{"status": "inactive"}'
+# Show status
+gitdb status
 ```
 
 ---
 
 ## 🌐 REST API
 
-When the server is running, you can use the REST API:
+The API server provides RESTful endpoints for database operations.
 
-### Collections
-```bash
-# List collections
-curl http://localhost:7896/api/collections
-
-# Create collection
-curl -X POST http://localhost:7896/api/collections \
-  -H "Content-Type: application/json" \
-  -d '{"name": "users"}'
+### Base URL
+```
+http://localhost:7896/api/v1
 ```
 
-### Documents
+### Authentication
+First, connect to a database:
 ```bash
-# Insert document
-curl -X POST http://localhost:7896/api/documents \
-  -H "Content-Type: application/json" \
-  -d '{"collection": "users", "document": {"name": "John", "age": 30}}'
+POST /api/v1/collections/connect
+Content-Type: application/json
 
-# Find documents
-curl "http://localhost:7896/api/documents?collection=users&query={\"age\":{\"$gte\":25}}"
-
-# Update document
-curl -X PUT http://localhost:7896/api/documents/abc123 \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John Updated", "age": 31}'
-
-# Delete document
-curl -X DELETE http://localhost:7896/api/documents/abc123
+{
+  "token": "your_github_token",
+  "owner": "your_username",
+  "repo": "your_repo"
+}
 ```
 
 ---
 
-## 🔌 Database Connection Examples
+## 🔌 Backend Integration Examples
 
 ### Node.js (JavaScript/TypeScript)
 
@@ -273,7 +179,7 @@ curl -X DELETE http://localhost:7896/api/documents/abc123
 const axios = require('axios');
 
 class GitDBClient {
-  constructor(baseURL = 'http://localhost:7896/api') {
+  constructor(baseURL = 'http://localhost:7896/api/v1') {
     this.baseURL = baseURL;
   }
 
@@ -290,31 +196,22 @@ class GitDBClient {
   }
 
   async insertDocument(collection, data) {
-    const response = await axios.post(`${this.baseURL}/documents`, {
-      collection, document: data
-    });
+    const response = await axios.post(`${this.baseURL}/collections/${collection}/documents`, data);
     return response.data;
   }
 
   async getDocument(collection, id) {
-    const response = await axios.get(`${this.baseURL}/documents/${id}?collection=${collection}`);
+    const response = await axios.get(`${this.baseURL}/collections/${collection}/documents/${id}`);
     return response.data;
   }
 
   async updateDocument(collection, id, data) {
-    const response = await axios.put(`${this.baseURL}/documents/${id}`, data);
+    const response = await axios.put(`${this.baseURL}/collections/${collection}/documents/${id}`, data);
     return response.data;
   }
 
   async deleteDocument(collection, id) {
-    const response = await axios.delete(`${this.baseURL}/documents/${id}?collection=${collection}`);
-    return response.data;
-  }
-
-  async findDocuments(collection, query = {}) {
-    const response = await axios.get(`${this.baseURL}/documents`, {
-      params: { collection, query: JSON.stringify(query) }
-    });
+    const response = await axios.delete(`${this.baseURL}/collections/${collection}/documents/${id}`);
     return response.data;
   }
 }
@@ -329,13 +226,13 @@ await gitdb.insertDocument('users', { name: 'Alice', email: 'alice@example.com' 
 #### Using Fetch (ES6+)
 ```javascript
 class GitDBClient {
-  constructor(baseURL = 'http://localhost:7896/api') {
+  constructor(baseURL = 'http://localhost:7896/api/v1') {
     this.baseURL = baseURL;
   }
 
   async request(endpoint, options = {}) {
     const response = await fetch(`${this.baseURL}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers: { 'Content-Type': 'application/json' },
       ...options
     });
     return response.json();
@@ -349,26 +246,9 @@ class GitDBClient {
   }
 
   async insertDocument(collection, data) {
-    return this.request('/documents', {
+    return this.request(`/collections/${collection}/documents`, {
       method: 'POST',
-      body: JSON.stringify({ collection, document: data })
-    });
-  }
-
-  async getDocument(collection, id) {
-    return this.request(`/documents/${id}?collection=${collection}`);
-  }
-
-  async updateDocument(collection, id, data) {
-    return this.request(`/documents/${id}`, {
-      method: 'PUT',
       body: JSON.stringify(data)
-    });
-  }
-
-  async deleteDocument(collection, id) {
-    return this.request(`/documents/${id}?collection=${collection}`, {
-      method: 'DELETE'
     });
   }
 }
@@ -382,7 +262,7 @@ import requests
 import json
 
 class GitDBClient:
-    def __init__(self, base_url="http://localhost:7896/api"):
+    def __init__(self, base_url="http://localhost:7896/api/v1"):
         self.base_url = base_url
         self.session = requests.Session()
         self.session.headers.update({'Content-Type': 'application/json'})
@@ -397,27 +277,21 @@ class GitDBClient:
         return response.json()
 
     def insert_document(self, collection, data):
-        response = self.session.post(f"{self.base_url}/documents", 
-                                   json={'collection': collection, 'document': data})
+        response = self.session.post(f"{self.base_url}/collections/{collection}/documents", 
+                                   json=data)
         return response.json()
 
     def get_document(self, collection, doc_id):
-        response = self.session.get(f"{self.base_url}/documents/{doc_id}?collection={collection}")
+        response = self.session.get(f"{self.base_url}/collections/{collection}/documents/{doc_id}")
         return response.json()
 
     def update_document(self, collection, doc_id, data):
-        response = self.session.put(f"{self.base_url}/documents/{doc_id}", json=data)
+        response = self.session.put(f"{self.base_url}/collections/{collection}/documents/{doc_id}", 
+                                  json=data)
         return response.json()
 
     def delete_document(self, collection, doc_id):
-        response = self.session.delete(f"{self.base_url}/documents/{doc_id}?collection={collection}")
-        return response.json()
-
-    def find_documents(self, collection, query=None):
-        params = {'collection': collection}
-        if query:
-            params['query'] = json.dumps(query)
-        response = self.session.get(f"{self.base_url}/documents", params=params)
+        response = self.session.delete(f"{self.base_url}/collections/{collection}/documents/{doc_id}")
         return response.json()
 
 # Usage
@@ -430,35 +304,23 @@ gitdb.insert_document('users', {'name': 'Alice', 'email': 'alice@example.com'})
 #### Using aiohttp (Async)
 ```python
 import aiohttp
-import json
 import asyncio
 
 class AsyncGitDBClient:
-    def __init__(self, base_url="http://localhost:7896/api"):
+    def __init__(self, base_url="http://localhost:7896/api/v1"):
         self.base_url = base_url
 
-    async def request(self, method, endpoint, data=None, params=None):
+    async def connect(self, token, owner, repo):
         async with aiohttp.ClientSession() as session:
-            async with session.request(
-                method, 
-                f"{self.base_url}{endpoint}",
-                json=data,
-                params=params,
-                headers={'Content-Type': 'application/json'}
-            ) as response:
+            async with session.post(f"{self.base_url}/collections/connect", 
+                                  json={'token': token, 'owner': owner, 'repo': repo}) as response:
                 return await response.json()
 
-    async def connect(self, token, owner, repo):
-        return await self.request('POST', '/collections/connect', 
-                                {'token': token, 'owner': owner, 'repo': repo})
-
     async def insert_document(self, collection, data):
-        return await self.request('POST', '/documents', 
-                                {'collection': collection, 'document': data})
-
-    async def get_document(self, collection, doc_id):
-        return await self.request('GET', f'/documents/{doc_id}', 
-                                params={'collection': collection})
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.base_url}/collections/{collection}/documents", 
+                                  json=data) as response:
+                return await response.json()
 
 # Usage
 async def main():
@@ -478,106 +340,120 @@ import com.google.gson.Gson;
 import java.io.IOException;
 
 public class GitDBClient {
-    private final String baseUrl;
+    private final String baseURL;
     private final OkHttpClient client;
     private final Gson gson;
 
-    public GitDBClient(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public GitDBClient(String baseURL) {
+        this.baseURL = baseURL;
         this.client = new OkHttpClient();
         this.gson = new Gson();
     }
 
     public GitDBClient() {
-        this("http://localhost:7896/api");
+        this("http://localhost:7896/api/v1");
     }
 
-    public String connect(String token, String owner, String repo) throws IOException {
-        String json = gson.toJson(new ConnectionRequest(token, owner, repo));
+    public void connect(String token, String owner, String repo) throws IOException {
+        String json = gson.toJson(new ConnectRequest(token, owner, repo));
         RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
-        
         Request request = new Request.Builder()
-            .url(baseUrl + "/collections/connect")
-            .post(body)
-            .build();
+                .url(baseURL + "/collections/connect")
+                .post(body)
+                .build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
         }
     }
 
-    public String insertDocument(String collection, Object data) throws IOException {
-        DocumentRequest docRequest = new DocumentRequest(collection, data);
-        String json = gson.toJson(docRequest);
+    public void createCollection(String name) throws IOException {
+        String json = gson.toJson(new CollectionRequest(name));
         RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
-        
         Request request = new Request.Builder()
-            .url(baseUrl + "/documents")
-            .post(body)
-            .build();
+                .url(baseURL + "/collections")
+                .post(body)
+                .build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
         }
     }
 
-    public String getDocument(String collection, String id) throws IOException {
-        Request request = new Request.Builder()
-            .url(baseUrl + "/documents/" + id + "?collection=" + collection)
-            .get()
-            .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
-        }
-    }
-
-    public String updateDocument(String collection, String id, Object data) throws IOException {
+    public void insertDocument(String collection, Object data) throws IOException {
         String json = gson.toJson(data);
         RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
-        
         Request request = new Request.Builder()
-            .url(baseUrl + "/documents/" + id)
-            .put(body)
-            .build();
+                .url(baseURL + "/collections/" + collection + "/documents")
+                .post(body)
+                .build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
         }
     }
 
-    public String deleteDocument(String collection, String id) throws IOException {
-        Request request = new Request.Builder()
-            .url(baseUrl + "/documents/" + id + "?collection=" + collection)
-            .delete()
-            .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
-        }
-    }
-
-    // Helper classes
-    private static class ConnectionRequest {
+    private static class ConnectRequest {
         String token, owner, repo;
-        ConnectionRequest(String token, String owner, String repo) {
+        ConnectRequest(String token, String owner, String repo) {
             this.token = token; this.owner = owner; this.repo = repo;
         }
     }
 
-    private static class DocumentRequest {
-        String collection;
-        Object document;
-        DocumentRequest(String collection, Object document) {
-            this.collection = collection; this.document = document;
-        }
+    private static class CollectionRequest {
+        String name;
+        CollectionRequest(String name) { this.name = name; }
     }
 }
 
 // Usage
 GitDBClient gitdb = new GitDBClient();
 gitdb.connect("your_token", "your_username", "your_repo");
+gitdb.createCollection("users");
 gitdb.insertDocument("users", Map.of("name", "Alice", "email", "alice@example.com"));
+```
+
+#### Using Spring RestTemplate
+```java
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.util.Map;
+
+@Service
+public class GitDBService {
+    private final RestTemplate restTemplate;
+    private final String baseURL;
+
+    public GitDBService() {
+        this.restTemplate = new RestTemplate();
+        this.baseURL = "http://localhost:7896/api/v1";
+    }
+
+    public void connect(String token, String owner, String repo) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        Map<String, String> request = Map.of(
+            "token", token,
+            "owner", owner,
+            "repo", repo
+        );
+        
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
+        restTemplate.postForObject(baseURL + "/collections/connect", entity, Object.class);
+    }
+
+    public void insertDocument(String collection, Object data) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        HttpEntity<Object> entity = new HttpEntity<>(data, headers);
+        restTemplate.postForObject(baseURL + "/collections/" + collection + "/documents", 
+                                 entity, Object.class);
+    }
+}
 ```
 
 ### C#
@@ -587,66 +463,70 @@ gitdb.insertDocument("users", Map.of("name", "Alice", "email", "alice@example.co
 using System;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 public class GitDBClient
 {
-    private readonly HttpClient _client;
-    private readonly string _baseUrl;
+    private readonly HttpClient _httpClient;
+    private readonly string _baseURL;
 
-    public GitDBClient(string baseUrl = "http://localhost:7896/api")
+    public GitDBClient(string baseURL = "http://localhost:7896/api/v1")
     {
-        _baseUrl = baseUrl;
-        _client = new HttpClient();
-        _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+        _baseURL = baseURL;
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
     }
 
-    public async Task<string> ConnectAsync(string token, string owner, string repo)
+    public async Task ConnectAsync(string token, string owner, string repo)
     {
-        var data = new { token, owner, repo };
-        var json = JsonConvert.SerializeObject(data);
+        var request = new
+        {
+            token = token,
+            owner = owner,
+            repo = repo
+        };
+
+        var json = JsonSerializer.Serialize(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await _client.PostAsync($"{_baseUrl}/collections/connect", content);
-        return await response.Content.ReadAsStringAsync();
+        
+        var response = await _httpClient.PostAsync($"{_baseURL}/collections/connect", content);
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<string> InsertDocumentAsync(string collection, object data)
+    public async Task CreateCollectionAsync(string name)
     {
-        var request = new { collection, document = data };
-        var json = JsonConvert.SerializeObject(request);
+        var request = new { name = name };
+        var json = JsonSerializer.Serialize(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await _client.PostAsync($"{_baseUrl}/documents", content);
-        return await response.Content.ReadAsStringAsync();
+        
+        var response = await _httpClient.PostAsync($"{_baseURL}/collections", content);
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<string> GetDocumentAsync(string collection, string id)
+    public async Task InsertDocumentAsync(string collection, object data)
     {
-        var response = await _client.GetAsync($"{_baseUrl}/documents/{id}?collection={collection}");
-        return await response.Content.ReadAsStringAsync();
-    }
-
-    public async Task<string> UpdateDocumentAsync(string collection, string id, object data)
-    {
-        var json = JsonConvert.SerializeObject(data);
+        var json = JsonSerializer.Serialize(data);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await _client.PutAsync($"{_baseUrl}/documents/{id}", content);
-        return await response.Content.ReadAsStringAsync();
+        
+        var response = await _httpClient.PostAsync($"{_baseURL}/collections/{collection}/documents", content);
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<string> DeleteDocumentAsync(string collection, string id)
+    public async Task<T> GetDocumentAsync<T>(string collection, string id)
     {
-        var response = await _client.DeleteAsync($"{_baseUrl}/documents/{id}?collection={collection}");
-        return await response.Content.ReadAsStringAsync();
+        var response = await _httpClient.GetAsync($"{_baseURL}/collections/{collection}/documents/{id}");
+        response.EnsureSuccessStatusCode();
+        
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<T>(json);
     }
 }
 
 // Usage
 var gitdb = new GitDBClient();
 await gitdb.ConnectAsync("your_token", "your_username", "your_repo");
+await gitdb.CreateCollectionAsync("users");
 await gitdb.InsertDocumentAsync("users", new { name = "Alice", email = "alice@example.com" });
 ```
 
@@ -657,46 +537,46 @@ await gitdb.InsertDocumentAsync("users", new { name = "Alice", email = "alice@ex
 <?php
 
 class GitDBClient {
-    private $baseUrl;
+    private $baseURL;
     
-    public function __construct($baseUrl = 'http://localhost:7896/api') {
-        $this->baseUrl = $baseUrl;
+    public function __construct($baseURL = 'http://localhost:7896/api/v1') {
+        $this->baseURL = $baseURL;
     }
     
     public function connect($token, $owner, $repo) {
-        $data = json_encode(['token' => $token, 'owner' => $owner, 'repo' => $repo]);
+        $data = [
+            'token' => $token,
+            'owner' => $owner,
+            'repo' => $repo
+        ];
+        
         return $this->makeRequest('/collections/connect', 'POST', $data);
     }
     
+    public function createCollection($name) {
+        return $this->makeRequest('/collections', 'POST', ['name' => $name]);
+    }
+    
     public function insertDocument($collection, $data) {
-        $requestData = json_encode(['collection' => $collection, 'document' => $data]);
-        return $this->makeRequest('/documents', 'POST', $requestData);
+        return $this->makeRequest("/collections/{$collection}/documents", 'POST', $data);
     }
     
     public function getDocument($collection, $id) {
-        return $this->makeRequest("/documents/{$id}?collection={$collection}", 'GET');
-    }
-    
-    public function updateDocument($collection, $id, $data) {
-        $jsonData = json_encode($data);
-        return $this->makeRequest("/documents/{$id}", 'PUT', $jsonData);
-    }
-    
-    public function deleteDocument($collection, $id) {
-        return $this->makeRequest("/documents/{$id}?collection={$collection}", 'DELETE');
+        return $this->makeRequest("/collections/{$collection}/documents/{$id}", 'GET');
     }
     
     private function makeRequest($endpoint, $method, $data = null) {
+        $url = $this->baseURL . $endpoint;
+        
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->baseUrl . $endpoint);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         
         if ($data) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data)
+                'Content-Type: application/json'
             ]);
         }
         
@@ -710,6 +590,7 @@ class GitDBClient {
 // Usage
 $gitdb = new GitDBClient();
 $gitdb->connect('your_token', 'your_username', 'your_repo');
+$gitdb->createCollection('users');
 $gitdb->insertDocument('users', ['name' => 'Alice', 'email' => 'alice@example.com']);
 ?>
 ```
@@ -724,9 +605,7 @@ import (
     "bytes"
     "encoding/json"
     "fmt"
-    "io"
     "net/http"
-    "net/url"
 )
 
 type GitDBClient struct {
@@ -736,7 +615,7 @@ type GitDBClient struct {
 
 func NewGitDBClient(baseURL string) *GitDBClient {
     if baseURL == "" {
-        baseURL = "http://localhost:7896/api"
+        baseURL = "http://localhost:7896/api/v1"
     }
     return &GitDBClient{
         baseURL: baseURL,
@@ -744,72 +623,54 @@ func NewGitDBClient(baseURL string) *GitDBClient {
     }
 }
 
-func (c *GitDBClient) Connect(token, owner, repo string) (map[string]interface{}, error) {
+func (g *GitDBClient) Connect(token, owner, repo string) error {
     data := map[string]string{
         "token": token,
         "owner": owner,
         "repo":  repo,
     }
-    return c.makeRequest("POST", "/collections/connect", data, nil)
-}
-
-func (c *GitDBClient) InsertDocument(collection string, document interface{}) (map[string]interface{}, error) {
-    data := map[string]interface{}{
-        "collection": collection,
-        "document":   document,
-    }
-    return c.makeRequest("POST", "/documents", data, nil)
-}
-
-func (c *GitDBClient) GetDocument(collection, id string) (map[string]interface{}, error) {
-    params := url.Values{}
-    params.Add("collection", collection)
-    return c.makeRequest("GET", "/documents/"+id+"?"+params.Encode(), nil, nil)
-}
-
-func (c *GitDBClient) UpdateDocument(collection, id string, document interface{}) (map[string]interface{}, error) {
-    return c.makeRequest("PUT", "/documents/"+id, document, nil)
-}
-
-func (c *GitDBClient) DeleteDocument(collection, id string) (map[string]interface{}, error) {
-    params := url.Values{}
-    params.Add("collection", collection)
-    return c.makeRequest("DELETE", "/documents/"+id+"?"+params.Encode(), nil, nil)
-}
-
-func (c *GitDBClient) makeRequest(method, endpoint string, data interface{}, params url.Values) (map[string]interface{}, error) {
-    var body io.Reader
-    if data != nil {
-        jsonData, err := json.Marshal(data)
-        if err != nil {
-            return nil, err
-        }
-        body = bytes.NewBuffer(jsonData)
-    }
-
-    req, err := http.NewRequest(method, c.baseURL+endpoint, body)
+    
+    jsonData, _ := json.Marshal(data)
+    resp, err := g.client.Post(g.baseURL+"/collections/connect", "application/json", bytes.NewBuffer(jsonData))
     if err != nil {
-        return nil, err
-    }
-
-    req.Header.Set("Content-Type", "application/json")
-
-    resp, err := c.client.Do(req)
-    if err != nil {
-        return nil, err
+        return err
     }
     defer resp.Body.Close()
+    
+    return nil
+}
 
-    var result map[string]interface{}
-    err = json.NewDecoder(resp.Body).Decode(&result)
-    return result, err
+func (g *GitDBClient) CreateCollection(name string) error {
+    data := map[string]string{"name": name}
+    jsonData, _ := json.Marshal(data)
+    
+    resp, err := g.client.Post(g.baseURL+"/collections", "application/json", bytes.NewBuffer(jsonData))
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    
+    return nil
+}
+
+func (g *GitDBClient) InsertDocument(collection string, data interface{}) error {
+    jsonData, _ := json.Marshal(data)
+    
+    resp, err := g.client.Post(g.baseURL+"/collections/"+collection+"/documents", "application/json", bytes.NewBuffer(jsonData))
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    
+    return nil
 }
 
 // Usage
 func main() {
     gitdb := NewGitDBClient("")
     gitdb.Connect("your_token", "your_username", "your_repo")
-    gitdb.InsertDocument("users", map[string]interface{}{
+    gitdb.CreateCollection("users")
+    gitdb.InsertDocument("users", map[string]string{
         "name":  "Alice",
         "email": "alice@example.com",
     })
@@ -822,10 +683,9 @@ func main() {
 ```ruby
 require 'net/http'
 require 'json'
-require 'uri'
 
 class GitDBClient
-  def initialize(base_url = 'http://localhost:7896/api')
+  def initialize(base_url = 'http://localhost:7896/api/v1')
     @base_url = base_url
   end
 
@@ -834,45 +694,38 @@ class GitDBClient
     make_request('/collections/connect', 'POST', data)
   end
 
+  def create_collection(name)
+    make_request('/collections', 'POST', { name: name })
+  end
+
   def insert_document(collection, data)
-    request_data = { collection: collection, document: data }
-    make_request('/documents', 'POST', request_data)
+    make_request("/collections/#{collection}/documents", 'POST', data)
   end
 
   def get_document(collection, id)
-    make_request("/documents/#{id}?collection=#{collection}", 'GET')
-  end
-
-  def update_document(collection, id, data)
-    make_request("/documents/#{id}", 'PUT', data)
-  end
-
-  def delete_document(collection, id)
-    make_request("/documents/#{id}?collection=#{collection}", 'DELETE')
+    make_request("/collections/#{collection}/documents/#{id}", 'GET')
   end
 
   private
 
   def make_request(endpoint, method, data = nil)
-    uri = URI("#{@base_url}#{endpoint}")
+    uri = URI(@base_url + endpoint)
     
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = (uri.scheme == 'https')
-    
     request = case method
-              when 'GET'
-                Net::HTTP::Get.new(uri)
               when 'POST'
                 Net::HTTP::Post.new(uri)
+              when 'GET'
+                Net::HTTP::Get.new(uri)
               when 'PUT'
                 Net::HTTP::Put.new(uri)
               when 'DELETE'
                 Net::HTTP::Delete.new(uri)
               end
-
+    
     request['Content-Type'] = 'application/json'
     request.body = data.to_json if data
-
+    
     response = http.request(request)
     JSON.parse(response.body)
   end
@@ -881,885 +734,217 @@ end
 # Usage
 gitdb = GitDBClient.new
 gitdb.connect('your_token', 'your_username', 'your_repo')
+gitdb.create_collection('users')
 gitdb.insert_document('users', { name: 'Alice', email: 'alice@example.com' })
 ```
 
----
+### Rust
 
-## 🔍 Query Execution Examples
+#### Using reqwest
+```rust
+use serde_json::{json, Value};
+use reqwest::Client;
 
-### Data Insertion Examples
-
-#### Node.js Data Insertion
-```javascript
-// Using the GitDBClient from above
-const gitdb = new GitDBClient();
-
-// Connect to GitDB
-await gitdb.connect('your_token', 'your_username', 'your_repo');
-
-// Insert single document
-const user = await gitdb.insertDocument('users', {
-  name: 'John Doe',
-  email: 'john@example.com',
-  age: 30,
-  city: 'New York',
-  skills: ['JavaScript', 'Node.js', 'React'],
-  profile: {
-    bio: 'Full-stack developer',
-    website: 'https://johndoe.com'
-  },
-  createdAt: new Date()
-});
-
-console.log('Inserted user:', user);
-
-// Insert multiple documents
-const users = [
-  { name: 'Alice Smith', email: 'alice@example.com', age: 25, city: 'San Francisco' },
-  { name: 'Bob Johnson', email: 'bob@example.com', age: 35, city: 'Chicago' },
-  { name: 'Carol Davis', email: 'carol@example.com', age: 28, city: 'Boston' }
-];
-
-for (const userData of users) {
-  const result = await gitdb.insertDocument('users', userData);
-  console.log('Inserted:', result);
-}
-```
-
-#### Python Data Insertion
-```python
-# Using the GitDBClient from above
-gitdb = GitDBClient()
-
-# Connect to GitDB
-gitdb.connect('your_token', 'your_username', 'your_repo')
-
-# Insert single document
-user = gitdb.insert_document('users', {
-    'name': 'John Doe',
-    'email': 'john@example.com',
-    'age': 30,
-    'city': 'New York',
-    'skills': ['Python', 'Django', 'Flask'],
-    'profile': {
-        'bio': 'Backend developer',
-        'website': 'https://johndoe.com'
-    },
-    'created_at': datetime.now()
-})
-
-print('Inserted user:', user)
-
-# Insert multiple documents
-users = [
-    {'name': 'Alice Smith', 'email': 'alice@example.com', 'age': 25, 'city': 'San Francisco'},
-    {'name': 'Bob Johnson', 'email': 'bob@example.com', 'age': 35, 'city': 'Chicago'},
-    {'name': 'Carol Davis', 'email': 'carol@example.com', 'age': 28, 'city': 'Boston'}
-]
-
-for user_data in users:
-    result = gitdb.insert_document('users', user_data)
-    print('Inserted:', result)
-```
-
-#### Java Data Insertion
-```java
-// Using the GitDBClient from above
-GitDBClient gitdb = new GitDBClient();
-
-// Connect to GitDB
-gitdb.connect("your_token", "your_username", "your_repo");
-
-// Insert single document
-Map<String, Object> user = new HashMap<>();
-user.put("name", "John Doe");
-user.put("email", "john@example.com");
-user.put("age", 30);
-user.put("city", "New York");
-user.put("skills", Arrays.asList("Java", "Spring", "Hibernate"));
-user.put("profile", Map.of("bio", "Java developer", "website", "https://johndoe.com"));
-user.put("createdAt", new Date());
-
-String result = gitdb.insertDocument("users", user);
-System.out.println("Inserted user: " + result);
-
-// Insert multiple documents
-List<Map<String, Object>> users = Arrays.asList(
-    Map.of("name", "Alice Smith", "email", "alice@example.com", "age", 25, "city", "San Francisco"),
-    Map.of("name", "Bob Johnson", "email", "bob@example.com", "age", 35, "city", "Chicago"),
-    Map.of("name", "Carol Davis", "email", "carol@example.com", "age", 28, "city", "Boston")
-);
-
-for (Map<String, Object> userData : users) {
-    String insertResult = gitdb.insertDocument("users", userData);
-    System.out.println("Inserted: " + insertResult);
-}
-```
-
-#### C# Data Insertion
-```csharp
-// Using the GitDBClient from above
-var gitdb = new GitDBClient();
-
-// Connect to GitDB
-await gitdb.ConnectAsync("your_token", "your_username", "your_repo");
-
-// Insert single document
-var user = new
-{
-    name = "John Doe",
-    email = "john@example.com",
-    age = 30,
-    city = "New York",
-    skills = new[] { "C#", ".NET", "ASP.NET" },
-    profile = new
-    {
-        bio = "C# developer",
-        website = "https://johndoe.com"
-    },
-    createdAt = DateTime.Now
-};
-
-var result = await gitdb.InsertDocumentAsync("users", user);
-Console.WriteLine($"Inserted user: {result}");
-
-// Insert multiple documents
-var users = new[]
-{
-    new { name = "Alice Smith", email = "alice@example.com", age = 25, city = "San Francisco" },
-    new { name = "Bob Johnson", email = "bob@example.com", age = 35, city = "Chicago" },
-    new { name = "Carol Davis", email = "carol@example.com", age = 28, city = "Boston" }
-};
-
-foreach (var userData in users)
-{
-    var insertResult = await gitdb.InsertDocumentAsync("users", userData);
-    Console.WriteLine($"Inserted: {insertResult}");
-}
-```
-
-#### PHP Data Insertion
-```php
-<?php
-// Using the GitDBClient from above
-$gitdb = new GitDBClient();
-
-// Connect to GitDB
-$gitdb->connect('your_token', 'your_username', 'your_repo');
-
-// Insert single document
-$user = [
-    'name' => 'John Doe',
-    'email' => 'john@example.com',
-    'age' => 30,
-    'city' => 'New York',
-    'skills' => ['PHP', 'Laravel', 'WordPress'],
-    'profile' => [
-        'bio' => 'PHP developer',
-        'website' => 'https://johndoe.com'
-    ],
-    'created_at' => date('Y-m-d H:i:s')
-];
-
-$result = $gitdb->insertDocument('users', $user);
-echo "Inserted user: " . json_encode($result) . "\n";
-
-// Insert multiple documents
-$users = [
-    ['name' => 'Alice Smith', 'email' => 'alice@example.com', 'age' => 25, 'city' => 'San Francisco'],
-    ['name' => 'Bob Johnson', 'email' => 'bob@example.com', 'age' => 35, 'city' => 'Chicago'],
-    ['name' => 'Carol Davis', 'email' => 'carol@example.com', 'age' => 28, 'city' => 'Boston']
-];
-
-foreach ($users as $userData) {
-    $insertResult = $gitdb->insertDocument('users', $userData);
-    echo "Inserted: " . json_encode($insertResult) . "\n";
-}
-?>
-```
-
-#### Go Data Insertion
-```go
-// Using the GitDBClient from above
-gitdb := NewGitDBClient("")
-
-// Connect to GitDB
-gitdb.Connect("your_token", "your_username", "your_repo")
-
-// Insert single document
-user := map[string]interface{}{
-    "name":  "John Doe",
-    "email": "john@example.com",
-    "age":   30,
-    "city":  "New York",
-    "skills": []string{"Go", "Gin", "GORM"},
-    "profile": map[string]interface{}{
-        "bio":     "Go developer",
-        "website": "https://johndoe.com",
-    },
-    "created_at": time.Now(),
+struct GitDBClient {
+    base_url: String,
+    client: Client,
 }
 
-result, err := gitdb.InsertDocument("users", user)
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Printf("Inserted user: %+v\n", result)
-
-// Insert multiple documents
-users := []map[string]interface{}{
-    {"name": "Alice Smith", "email": "alice@example.com", "age": 25, "city": "San Francisco"},
-    {"name": "Bob Johnson", "email": "bob@example.com", "age": 35, "city": "Chicago"},
-    {"name": "Carol Davis", "email": "carol@example.com", "age": 28, "city": "Boston"},
-}
-
-for _, userData := range users {
-    insertResult, err := gitdb.InsertDocument("users", userData)
-    if err != nil {
-        log.Printf("Error inserting user: %v", err)
-        continue
+impl GitDBClient {
+    fn new(base_url: Option<String>) -> Self {
+        GitDBClient {
+            base_url: base_url.unwrap_or_else(|| "http://localhost:7896/api/v1".to_string()),
+            client: Client::new(),
+        }
     }
-    fmt.Printf("Inserted: %+v\n", insertResult)
-}
-```
 
-#### Ruby Data Insertion
-```ruby
-# Using the GitDBClient from above
-gitdb = GitDBClient.new
+    async fn connect(&self, token: &str, owner: &str, repo: &str) -> Result<Value, Box<dyn std::error::Error>> {
+        let data = json!({
+            "token": token,
+            "owner": owner,
+            "repo": repo
+        });
 
-# Connect to GitDB
-gitdb.connect('your_token', 'your_username', 'your_repo')
+        let response = self.client
+            .post(&format!("{}/collections/connect", self.base_url))
+            .json(&data)
+            .send()
+            .await?;
 
-# Insert single document
-user = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  age: 30,
-  city: 'New York',
-  skills: ['Ruby', 'Rails', 'Sinatra'],
-  profile: {
-    bio: 'Ruby developer',
-    website: 'https://johndoe.com'
-  },
-  created_at: Time.now
-}
-
-result = gitdb.insert_document('users', user)
-puts "Inserted user: #{result}"
-
-# Insert multiple documents
-users = [
-  { name: 'Alice Smith', email: 'alice@example.com', age: 25, city: 'San Francisco' },
-  { name: 'Bob Johnson', email: 'bob@example.com', age: 35, city: 'Chicago' },
-  { name: 'Carol Davis', email: 'carol@example.com', age: 28, city: 'Boston' }
-]
-
-users.each do |user_data|
-  insert_result = gitdb.insert_document('users', user_data)
-  puts "Inserted: #{insert_result}"
-end
-```
-
-### Data Insertion with Error Handling
-
-#### Node.js with Error Handling
-```javascript
-async function insertUserSafely(userData) {
-  try {
-    const result = await gitdb.insertDocument('users', userData);
-    console.log('Successfully inserted:', result);
-    return result;
-  } catch (error) {
-    if (error.response) {
-      console.error('API Error:', error.response.data);
-    } else if (error.request) {
-      console.error('Network Error:', error.message);
-    } else {
-      console.error('Error:', error.message);
+        Ok(response.json().await?)
     }
-    throw error;
-  }
-}
 
-// Usage
-await insertUserSafely({
-  name: 'John Doe',
-  email: 'john@example.com',
-  age: 30
-});
-```
+    async fn create_collection(&self, name: &str) -> Result<Value, Box<dyn std::error::Error>> {
+        let data = json!({ "name": name });
 
-#### Python with Error Handling
-```python
-def insert_user_safely(user_data):
-    try:
-        result = gitdb.insert_document('users', user_data)
-        print('Successfully inserted:', result)
-        return result
-    except requests.exceptions.RequestException as e:
-        print('Network Error:', str(e))
-        raise
-    except Exception as e:
-        print('Error:', str(e))
-        raise
+        let response = self.client
+            .post(&format!("{}/collections", self.base_url))
+            .json(&data)
+            .send()
+            .await?;
 
-# Usage
-insert_user_safely({
-    'name': 'John Doe',
-    'email': 'john@example.com',
-    'age': 30
-})
-```
-
-### Batch Insertion Examples
-
-#### Node.js Batch Insertion
-```javascript
-async function batchInsert(collection, documents) {
-  const results = [];
-  const errors = [];
-  
-  for (const doc of documents) {
-    try {
-      const result = await gitdb.insertDocument(collection, doc);
-      results.push(result);
-    } catch (error) {
-      errors.push({ document: doc, error: error.message });
+        Ok(response.json().await?)
     }
-  }
-  
-  console.log(`Inserted ${results.length} documents successfully`);
-  if (errors.length > 0) {
-    console.log(`${errors.length} documents failed to insert:`, errors);
-  }
-  
-  return { results, errors };
+
+    async fn insert_document(&self, collection: &str, data: Value) -> Result<Value, Box<dyn std::error::Error>> {
+        let response = self.client
+            .post(&format!("{}/collections/{}/documents", self.base_url, collection))
+            .json(&data)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
 }
 
-// Usage
-const documents = [
-  { name: 'User 1', email: 'user1@example.com' },
-  { name: 'User 2', email: 'user2@example.com' },
-  { name: 'User 3', email: 'user3@example.com' }
-];
-
-await batchInsert('users', documents);
-```
-
-#### Python Batch Insertion
-```python
-def batch_insert(collection, documents):
-    results = []
-    errors = []
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let gitdb = GitDBClient::new(None);
     
-    for doc in documents:
-        try:
-            result = gitdb.insert_document(collection, doc)
-            results.append(result)
-        except Exception as e:
-            errors.append({'document': doc, 'error': str(e)})
+    gitdb.connect("your_token", "your_username", "your_repo").await?;
+    gitdb.create_collection("users").await?;
     
-    print(f"Inserted {len(results)} documents successfully")
-    if errors:
-        print(f"{len(errors)} documents failed to insert: {errors}")
+    let user_data = json!({
+        "name": "Alice",
+        "email": "alice@example.com"
+    });
+    gitdb.insert_document("users", user_data).await?;
     
-    return {'results': results, 'errors': errors}
-
-# Usage
-documents = [
-    {'name': 'User 1', 'email': 'user1@example.com'},
-    {'name': 'User 2', 'email': 'user2@example.com'},
-    {'name': 'User 3', 'email': 'user3@example.com'}
-]
-
-batch_insert('users', documents)
-```
-
-### Basic Query Operations
-
-#### Find Documents with Filters
-```javascript
-// Node.js - Find users older than 25
-const users = await gitdb.findDocuments('users', {
-  age: { $gte: 25 }
-});
-
-// Python - Find active users
-users = gitdb.find_documents('users', {
-  'status': 'active',
-  'age': {'$gte': 18}
-});
-
-// Java - Find users by email domain
-String query = "{\"email\": {\"$regex\": \"@gmail.com\"}}";
-String result = gitdb.findDocuments("users", query);
-
-// C# - Find users created in last 30 days
-var query = new { 
-  createdAt = new { $gte = DateTime.Now.AddDays(-30) }
-};
-var users = await gitdb.FindDocumentsAsync("users", query);
-```
-
-#### Complex Queries with Multiple Conditions
-```javascript
-// Node.js - Complex query with AND/OR logic
-const query = {
-  $and: [
-    { age: { $gte: 18, $lte: 65 } },
-    { 
-      $or: [
-        { status: 'active' },
-        { status: 'pending' }
-      ]
-    },
-    { email: { $exists: true } }
-  ]
-};
-
-const results = await gitdb.findDocuments('users', query);
-```
-
-```python
-# Python - Complex query with nested conditions
-query = {
-    '$and': [
-        {'age': {'$gte': 18, '$lte': 65}},
-        {
-            '$or': [
-                {'status': 'active'},
-                {'status': 'pending'}
-            ]
-        },
-        {'email': {'$exists': True}}
-    ]
-}
-
-results = gitdb.find_documents('users', query)
-```
-
-#### Text Search and Pattern Matching
-```javascript
-// Node.js - Text search with regex
-const searchQuery = {
-  $or: [
-    { name: { $regex: 'john', $options: 'i' } },
-    { email: { $regex: 'john', $options: 'i' } },
-    { description: { $regex: 'developer', $options: 'i' } }
-  ]
-};
-
-const searchResults = await gitdb.findDocuments('users', searchQuery);
-```
-
-```python
-# Python - Case-insensitive text search
-search_query = {
-    '$or': [
-        {'name': {'$regex': 'john', '$options': 'i'}},
-        {'email': {'$regex': 'john', '$options': 'i'}},
-        {'description': {'$regex': 'developer', '$options': 'i'}}
-    ]
-}
-
-search_results = gitdb.find_documents('users', search_query)
-```
-
-### Advanced Query Operations
-
-#### Aggregation and Counting
-```javascript
-// Node.js - Count documents with conditions
-const activeUserCount = await gitdb.countDocuments('users', {
-  status: 'active',
-  lastLogin: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-});
-
-// Get distinct values
-const uniqueCities = await gitdb.distinct('users', 'city', {
-  country: 'USA'
-});
-```
-
-```python
-# Python - Count and distinct operations
-active_count = gitdb.count_documents('users', {
-    'status': 'active',
-    'last_login': {'$gte': datetime.now() - timedelta(days=30)}
-})
-
-unique_cities = gitdb.distinct('users', 'city', {
-    'country': 'USA'
-})
-```
-
-#### Pagination and Sorting
-```javascript
-// Node.js - Paginated results with sorting
-const pageSize = 10;
-const page = 1;
-const skip = (page - 1) * pageSize;
-
-const users = await gitdb.findDocuments('users', {}, {
-  sort: { createdAt: -1 },  // -1 for descending, 1 for ascending
-  limit: pageSize,
-  skip: skip
-});
-```
-
-```python
-# Python - Pagination with sorting
-page_size = 10
-page = 1
-skip = (page - 1) * page_size
-
-users = gitdb.find_documents('users', {}, {
-    'sort': {'created_at': -1},  # -1 for descending, 1 for ascending
-    'limit': page_size,
-    'skip': skip
-})
-```
-
-#### Array and Object Queries
-```javascript
-// Node.js - Query array fields
-const query = {
-  // Find users with specific tags
-  tags: { $in: ['developer', 'javascript'] },
-  
-  // Find users with at least 2 skills
-  skills: { $size: { $gte: 2 } },
-  
-  // Find users with specific address
-  'address.city': 'New York',
-  'address.country': 'USA'
-};
-
-const results = await gitdb.findDocuments('users', query);
-```
-
-```python
-# Python - Array and nested object queries
-query = {
-    # Find users with specific tags
-    'tags': {'$in': ['developer', 'javascript']},
-    
-    # Find users with at least 2 skills
-    'skills': {'$size': {'$gte': 2}},
-    
-    # Find users with specific address
-    'address.city': 'New York',
-    'address.country': 'USA'
-}
-
-results = gitdb.find_documents('users', query)
-```
-
-### Query Operators Reference
-
-#### Comparison Operators
-```javascript
-// Equal to
-{ field: value }
-
-// Not equal to
-{ field: { $ne: value } }
-
-// Greater than
-{ field: { $gt: value } }
-
-// Greater than or equal to
-{ field: { $gte: value } }
-
-// Less than
-{ field: { $lt: value } }
-
-// Less than or equal to
-{ field: { $lte: value } }
-
-// In array
-{ field: { $in: [value1, value2, value3] } }
-
-// Not in array
-{ field: { $nin: [value1, value2, value3] } }
-
-// Exists
-{ field: { $exists: true } }
-
-// Does not exist
-{ field: { $exists: false } }
-```
-
-#### Logical Operators
-```javascript
-// AND (implicit)
-{ field1: value1, field2: value2 }
-
-// AND (explicit)
-{ $and: [{ field1: value1 }, { field2: value2 }] }
-
-// OR
-{ $or: [{ field1: value1 }, { field2: value2 }] }
-
-// NOT
-{ $not: { field: value } }
-
-// NOR
-{ $nor: [{ field1: value1 }, { field2: value2 }] }
-```
-
-#### Array Operators
-```javascript
-// Array contains element
-{ array: element }
-
-// Array contains all elements
-{ array: { $all: [element1, element2] } }
-
-// Array size
-{ array: { $size: 3 } }
-
-// Array element at index
-{ 'array.0': value }
-
-// Array element matches condition
-{ array: { $elemMatch: { field: value } } }
-```
-
-### Error Handling Examples
-
-#### Node.js Error Handling
-```javascript
-try {
-  const results = await gitdb.findDocuments('users', {
-    age: { $gte: 18 }
-  });
-  console.log('Found users:', results);
-} catch (error) {
-  if (error.response) {
-    console.error('API Error:', error.response.data);
-  } else if (error.request) {
-    console.error('Network Error:', error.message);
-  } else {
-    console.error('Error:', error.message);
-  }
+    Ok(())
 }
 ```
 
-#### Python Error Handling
-```python
-try:
-    results = gitdb.find_documents('users', {
-        'age': {'$gte': 18}
-    })
-    print('Found users:', results)
-except requests.exceptions.RequestException as e:
-    print('Network Error:', str(e))
-except Exception as e:
-    print('Error:', str(e))
+### Collection Endpoints
+
+#### List Collections
+```bash
+GET /api/v1/collections
 ```
 
-### Performance Tips
+#### Create Collection
+```bash
+POST /api/v1/collections
+Content-Type: application/json
 
-#### Optimize Query Performance
-```javascript
-// 1. Use specific field queries instead of regex when possible
-// Good
-{ email: 'john@example.com' }
-
-// Avoid if possible
-{ email: { $regex: 'john@example.com' } }
-
-// 2. Use $exists to check for field presence
-{ field: { $exists: true } }
-
-// 3. Use $in instead of multiple $or conditions
-// Good
-{ status: { $in: ['active', 'pending'] } }
-
-// Less efficient
-{ $or: [{ status: 'active' }, { status: 'pending' }] }
-
-// 4. Limit results for large datasets
-const results = await gitdb.findDocuments('users', query, {
-  limit: 1000
-});
-```
-
-#### Batch Operations
-```javascript
-// Batch insert multiple documents
-const documents = [
-  { name: 'Alice', email: 'alice@example.com' },
-  { name: 'Bob', email: 'bob@example.com' },
-  { name: 'Charlie', email: 'charlie@example.com' }
-];
-
-for (const doc of documents) {
-  await gitdb.insertDocument('users', doc);
+{
+  "name": "users"
 }
-
-// Batch update multiple documents
-const updateQuery = { status: 'inactive' };
-const updateData = { lastUpdated: new Date() };
-await gitdb.updateMany('users', updateQuery, updateData);
 ```
 
----
-
-## 🔑 Configuration
-
-### GitHub Token
-You need a GitHub Personal Access Token with repo permissions:
-
-1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate new token with `repo` scope
-3. Set the token:
+#### Delete Collection
 ```bash
-gitdb set token YOUR_GITHUB_TOKEN
+DELETE /api/v1/collections/users
 ```
 
-### Repository Setup
+#### Get Collection Info
 ```bash
-# Set owner and repository
-gitdb set owner YOUR_USERNAME
-gitdb set repo YOUR_REPO_NAME
-
-# The repository will be created automatically if it doesn't exist
+GET /api/v1/collections/users
 ```
 
----
+### Document Endpoints
 
-## 🚨 Troubleshooting
-
-### Service Not Starting
+#### List Documents
 ```bash
-# Check if service is installed
-# Windows
-sc query GitDB
-
-# Linux
-sudo systemctl status gitdb
-
-# macOS
-launchctl list | grep gitdb
+GET /api/v1/collections/users/documents
 ```
 
-### Permission Issues
+#### Create Document
 ```bash
-# Linux/macOS: Run with sudo for service installation
-sudo npm install -g gitdb-database
+POST /api/v1/collections/users/documents
+Content-Type: application/json
 
-# Windows: Run as Administrator
+{
+  "name": "Alice",
+  "email": "alice@example.com"
+}
 ```
 
-### Port Already in Use
+#### Get Document
 ```bash
-# Change port
-gitdb server --port 7897
-
-# Or kill existing process
-# Windows
-netstat -ano | findstr :7896
-taskkill /PID <PID> /F
-
-# Linux/macOS
-lsof -ti:7896 | xargs kill -9
+GET /api/v1/collections/users/documents/abc123def456
 ```
 
-### GitHub API Limits
-- Free accounts: 5,000 requests/hour
-- Check limits: `gitdb count` (uses 1 request)
-- Consider using GitHub Enterprise for higher limits
+#### Update Document
+```bash
+PUT /api/v1/collections/users/documents/abc123def456
+Content-Type: application/json
+
+{
+  "email": "alice@new.com"
+}
+```
+
+#### Delete Document
+```bash
+DELETE /api/v1/collections/users/documents/abc123def456
+```
+
+#### Find Documents
+```bash
+POST /api/v1/collections/users/documents/find
+Content-Type: application/json
+
+{
+  "name": "Alice"
+}
+  ```
 
 ---
 
-## 📚 API Reference
+## 🏗️ Building Executables
 
-### Shell Commands
-| Command | Description |
-|---------|-------------|
-| `set token <token>` | Set GitHub token |
-| `set owner <owner>` | Set repository owner |
-| `set repo <repo>` | Set repository name |
-| `use <collection>` | Switch to collection |
-| `create-collection <name>` | Create new collection |
-| `show collections` | List all collections |
-| `show docs` | Show documents in current collection |
-| `insert <JSON>` | Insert document |
-| `find <id>` | Find document by ID |
-| `findone <query>` | Find first matching document |
-| `count [query]` | Count documents |
-| `update <id> <JSON>` | Update document |
-| `updatemany <query> <JSON>` | Update multiple documents |
-| `delete <id>` | Delete document |
-| `deletemany <query>` | Delete multiple documents |
-| `distinct <field> [query]` | Get distinct values |
-| `help` | Show help |
-| `exit` | Exit shell |
+Build standalone executables for distribution:
 
-### Server Options
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--port` | Server port | 7896 |
-| `--host` | Server host | 0.0.0.0 |
-| `--config` | Config file path | config.json |
+```bash
+# Build CLI executable
+npm run build:cli
+
+# Build shell executable
+npm run build:shell
+
+# Build server executable
+npm run build:server
+
+# Build for all platforms
+npm run build:all
+```
 
 ---
 
-## 🤝 Contributing
+## 🔧 Development
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+### Project Structure
+```
+src/
+├── api/           # REST API routes
+├── core/          # Database manager and CRUD operations
+├── github/        # GitHub API integration
+├── models/        # Data models
+├── utils/         # Utility functions
+├── cli.ts         # Command-line interface
+├── shell.ts       # Interactive shell
+└── server.ts      # API server
+```
 
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🆘 Support
-
-- 📖 **Documentation**: [GitHub Wiki](https://github.com/karthikeyanV2K/gitdb/wiki)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/karthikeyanV2K/gitdb/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/karthikeyanV2K/gitdb/discussions)
-
----
-
-## 🎉 What's New in v2.0.7
-
-- ✅ **Global npm package** - Install with `npm install -g gitdb-database`
-- ✅ **Node.js 18+ compatibility** - Works with Node.js 18.0.0 and higher
-- ✅ **Automatic service setup** - Works on Windows, Linux, macOS
-- ✅ **Cross-platform commands** - `gitdb`, `gitdb-shell`, `gitdb-server`
-- ✅ **Zero configuration** - Works out of the box
-- ✅ **Production ready** - Stable and reliable
-- ✅ **REST API** - Full HTTP API support
-- ✅ **Interactive shell** - Easy database management
-- ✅ **GitHub integration** - Store data in GitHub repositories
-- ✅ **Comprehensive query examples** - Multi-language query execution examples
-- ✅ **Advanced query operations** - Complex queries, aggregation, pagination
-- ✅ **Performance optimization tips** - Best practices for efficient queries
-- ✅ **Comprehensive data insertion examples** - Multi-language data insertion with error handling
-- ✅ **Batch insertion operations** - Efficient bulk data insertion patterns
+### Available Scripts
+- `npm run build` - Build TypeScript to JavaScript
+- `npm run dev` - Start development server with hot reload
+- `npm run start` - Start production server
+- `npm run shell` - Start interactive shell
+- `npm run cli` - Run CLI commands
+- `npm test` - Run tests
+- `npm run clean` - Clean build directory
 
 ---
 
-## 📦 Package Information
+## 🔒 Security
 
-- **NPM Package**: [gitdb-database](https://www.npmjs.com/package/gitdb-database)
-- **Version**: 2.0.7
-- **Install**: `npm install -g gitdb-database`
-- **Repository**: [karthikeyanV2K/gitdb](https://github.com/karthikeyanV2K/gitdb)
-- **License**: MIT
+- GitHub tokens are only used for API calls and never stored permanently
+- All operations are logged for audit purposes
+- Connection state is maintained in memory only
 
 ---
 
-**Made with ❤️ by the GitDB Team**
+## 📝 License
+
+MIT

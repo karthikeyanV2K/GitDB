@@ -2649,10 +2649,10 @@ GitDB represents a paradigm shift in database technology, combining the reliabil
 
 ### Community & Support
 
-- **GitHub**: [https://github.com/yourusername/gitdb](https://github.com/yourusername/gitdb)
+- **GitHub**: [https://github.com/yourusername/gitdb](https://github.com/karthikeyanV2K/gitdb)
 - **Documentation**: [https://gitdb.dev/docs](https://gitdb.dev/docs)
 - **Discord**: [https://discord.gg/gitdb](https://discord.gg/gitdb)
-- **Issues**: [https://github.com/yourusername/gitdb/issues](https://github.com/yourusername/gitdb/issues)
+- **Issues**: [https://github.com/yourusername/gitdb/issues](https://github.com/karthikeyanV2K/gitdb/issues)
 
 ### Contributing
 
@@ -2671,5 +2671,3 @@ GitDB is open source and welcomes contributions:
 
 ---
 
-*Last updated: January 2024*
-*Version: 1.0.0* 

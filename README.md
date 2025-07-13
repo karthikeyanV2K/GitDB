@@ -1,344 +1,478 @@
-# GitDB
+# GitDB 🚀
 
-📦 **GitDB** - GitHub-backed NoSQL Database (npm: `gitdb-database`)
+**GitHub-Backed NoSQL Database with CLI, GraphQL, AI, and SuperMode**
 
-- Modern CLI, interactive shell, REST API
-- Store your data in GitHub repositories
-- Cross-platform: Windows, Linux, macOS
-- Multi-language client support (Node.js, Python, Java, C#, PHP, Go, Ruby, ...)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/karthikeyanV2K/GitDB)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/typescript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
 
----
+> **Production-ready NoSQL database that stores data in Git repositories with advanced features like GraphQL, AI-powered queries, version control, and performance optimizations.**
+
+## ✨ Features
+
+### 🗄️ **Core Database**
+- **GitHub Integration** - Store data directly in Git repositories
+- **NoSQL Document Storage** - Flexible JSON document structure
+- **Collections & Documents** - Organize data with collections
+- **CRUD Operations** - Full Create, Read, Update, Delete support
+- **Query Language** - MongoDB-style query syntax
+
+### 🔧 **CLI Interface**
+- **Interactive Shell** - Command-line database operations
+- **Server Management** - Start, stop, monitor server
+- **Batch Operations** - Bulk data processing
+- **Schema Validation** - Data integrity enforcement
+- **Session Management** - Persistent configurations
+
+### 🌐 **API & Integration**
+- **REST API** - HTTP endpoints for programmatic access
+- **GraphQL API** - Dynamic schema with hot reload
+- **Real-time Updates** - Live data synchronization
+- **WebSocket Support** - Real-time communication
+
+### 🤖 **AI & Advanced Features**
+- **AI-Powered Queries** - Natural language database queries
+- **SuperMode** - Performance optimizations
+- **Auto-completion** - Intelligent command suggestions
+- **Query Optimization** - Automatic query improvement
+- **Schema Inference** - Automatic field type detection
+
+### 📊 **Version Control & History**
+- **Full Git History** - Every change tracked
+- **Rollback Capability** - Revert to any previous version
+- **Branch Support** - Experimental data branches
+- **Merge Resolution** - Conflict handling
+- **Audit Trail** - Complete operation history
+
+### ⚡ **Performance & Scalability**
+- **Caching Strategies** - Multi-level caching
+- **Connection Pooling** - Efficient resource management
+- **Batch Processing** - Bulk operation optimization
+- **Compression** - Data size reduction
+- **Delta Encoding** - Efficient updates
 
 ## 🚀 Quick Start
 
-```sh
+### Installation
+
+```bash
+# Install globally
 npm install -g gitdb-database
+
+# Or install locally
+npm install gitdb
 ```
 
-### Start the Server
-```sh
-gitdb server-start      # Background service
-gitdb server            # Foreground mode
+### Setup
+
+1. **Create a GitHub repository** for your data
+2. **Generate a Personal Access Token** with `repo` permissions
+3. **Set environment variables**:
+
+```bash
+export GITHUB_TOKEN=your_personal_access_token
+export GITHUB_OWNER=your_github_username
+export GITHUB_REPO=your_data_repository
 ```
 
-### Interactive Shell
-```sh
+### Basic Usage
+
+```bash
+# Connect to your database
+gitdb connect -t your_token -o your_owner -r your_repo
+
+# Create a collection
+gitdb create-collection users
+
+# Add a document
+gitdb create-doc users '{"name":"John","age":30,"email":"john@example.com"}'
+
+# Query documents
+gitdb find users '{"age":{"$gt":25}}'
+
+# Start the server
+gitdb server
+```
+
+## 📖 Documentation
+
+### CLI Commands
+
+#### Basic Operations
+```bash
+# Database connection
+gitdb connect -t <token> -o <owner> -r <repo>
+
+# Collections
+gitdb collections
+gitdb create-collection <name>
+gitdb delete-collection <name>
+
+# Documents
+gitdb documents <collection>
+gitdb create-doc <collection> <json-data>
+gitdb read-doc <collection> <id>
+gitdb update-doc <collection> <id> <json-data>
+gitdb delete-doc <collection> <id>
+
+# Queries
+gitdb find <collection> <query>
+```
+
+#### Server Management
+```bash
+# Server control
+gitdb server                    # Start server (foreground)
+gitdb server-start             # Start server (background)
+gitdb server-stop              # Stop server
+gitdb server-status            # Check server status
+gitdb server-restart           # Restart server
+gitdb server-log               # View server logs
+```
+
+#### Advanced Features
+```bash
+# Version control
+gitdb version history <collection>
+gitdb version rollback <collection> --commit <hash>
+
+# SuperMode optimizations
+gitdb supermode enable --cache-size 1000
+gitdb supermode disable
+gitdb supermode stats
+
+# GraphQL management
+gitdb graphql schema
+gitdb graphql regen-schema
+
+# Reference resolution
+gitdb resolve <collection> <id>
+
+# Interactive shell
 gitdb shell
 ```
 
-### Show Help
-```sh
-gitdb --help
+### API Endpoints
+
+#### REST API (Port 7896)
+```bash
+# Health check
+GET /health
+
+# Collections
+GET    /api/v1/collections
+POST   /api/v1/collections
+DELETE /api/v1/collections/:name
+
+# Documents
+GET    /api/v1/collections/:name/documents
+POST   /api/v1/collections/:name/documents
+GET    /api/v1/collections/:name/documents/:id
+PUT    /api/v1/collections/:name/documents/:id
+DELETE /api/v1/collections/:name/documents/:id
 ```
+
+#### GraphQL API
+```graphql
+# Get collections
+query {
+  collections
+}
+
+# Get documents
+query {
+  documents(collection: "users") {
+    _id
+    name
+    age
+  }
+}
+
+# Get specific document
+query {
+  document(collection: "users", id: "abc123") {
+    _id
+    name
+    age
+  }
+}
+```
+
+### Query Examples
+
+```bash
+# Find users older than 25
+gitdb find users '{"age":{"$gt":25}}'
+
+# Find active users with specific roles
+gitdb find users '{"$and":[{"active":true},{"role":{"$in":["admin","moderator"]}}]}'
+
+# Find documents with non-null email
+gitdb find users '{"email":{"$ne":null}}'
+
+# Complex queries
+gitdb find products '{"$or":[{"category":"electronics"},{"price":{"$lt":100}}]}'
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   CLI Interface │    │   REST API      │    │   GraphQL API   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   GitDB Core    │
+                    │   Database      │
+                    └─────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   GitHub API    │
+                    │   (Git Storage) │
+                    └─────────────────┘
+```
+
+## 🔧 Development
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- GitHub account with Personal Access Token
+
+### Setup Development Environment
+
+```bash
+# Clone repository
+git clone https://github.com/karthikeyanV2K/GitDB.git
+cd GitDB
+
+# Install dependencies
+npm install
+
+# Build project
+npm run build
+
+# Run in development
+npm run dev
+
+# Run tests
+npm test
+```
+
+### Project Structure
+```
+gitdb/
+├── src/
+│   ├── api/           # REST API endpoints
+│   ├── core/          # Core database logic
+│   ├── ai/            # AI-powered features
+│   ├── cli.ts         # CLI entry point
+│   ├── server.ts      # Server entry point
+│   ├── shell.ts       # Interactive shell
+│   └── graphql.ts     # GraphQL schema and resolvers
+├── bin/               # Compiled binaries
+├── dist/              # TypeScript output
+├── assets/            # Icons and images
+└── package.json       # Dependencies and scripts
+```
+
+## 🚀 Deployment
+
+### Production Setup
+
+```bash
+# Set production environment
+export NODE_ENV=production
+export PORT=7896
+export GITHUB_TOKEN=your_token
+
+# Start server
+gitdb server
+```
+
+### Docker Deployment
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist/ ./dist/
+EXPOSE 7896
+CMD ["node", "dist/server.js"]
+```
+
+### Cloud Deployment
+
+- **AWS**: EC2, ECS, or Lambda
+- **Google Cloud**: Cloud Run or App Engine
+- **Azure**: App Service or Container Instances
+- **Heroku**: Direct deployment
+
+## 🔒 Security
+
+### Authentication
+- GitHub Personal Access Token required
+- Repository-level access control
+- Environment variable configuration
+
+### Authorization
+- Local-only admin operations
+- Repository permission validation
+- Input sanitization and validation
+
+### Network Security
+- CORS configuration
+- Request logging and monitoring
+- Rate limiting support
+- HTTPS/TLS ready
+
+## 📊 Performance
+
+### Optimizations
+- **SuperMode**: Advanced caching and compression
+- **Batch Operations**: Bulk data processing
+- **Connection Pooling**: Efficient resource management
+- **Query Optimization**: Automatic query improvement
+- **Delta Encoding**: Efficient update strategies
+
+### Monitoring
+- Health check endpoints
+- Performance metrics
+- Resource usage tracking
+- Error monitoring and alerting
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Add tests for new features
+- Update documentation
+- Maintain backward compatibility
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **GitHub API** for repository storage
+- **Apollo GraphQL** for GraphQL implementation
+- **Express.js** for REST API framework
+- **TypeScript** for type safety
+- **Node.js** for runtime environment
+
+## 📞 Support
+
+- **Documentation**: [Complete Documentation](GITDB-COMPLETE-DOCUMENTATION.txt)
+- **Issues**: [GitHub Issues](https://github.com/karthikeyanV2K/GitDB/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/karthikeyanV2K/GitDB/discussions)
+- **Wiki**: [Project Wiki](https://github.com/karthikeyanV2K/GitDB/wiki)
+
+## 🎯 Roadmap
+
+### Upcoming Features
+- [ ] Real-time subscriptions
+- [ ] Advanced analytics
+- [ ] Machine learning integration
+- [ ] Multi-region support
+- [ ] Enhanced security features
+- [ ] Mobile SDK
+- [ ] Desktop application
+- [ ] Cloud hosting service
+
+### Version History
+- **v2.2.0** - Production ready with GraphQL, SuperMode, and AI
+- **v2.1.0** - Major rewrite with TypeScript and advanced features
+- **v1.0.0** - Initial release with basic functionality
 
 ---
 
-## 📋 Features
-- ✅ Automatic Service Setup (Windows Service, systemd, launchd)
-- ✅ Cross-Platform CLI (`gitdb`, `gitdb-shell`, `gitdb-server`)
-- ✅ Zero Configuration (works out of the box)
-- ✅ Production Ready (stable, reliable, REST API)
-- ✅ GitHub Integration (store data in your repo)
-- ✅ Multi-language SDK/Client support
+**Made with ❤️ by the AFOT Team**
 
----
+[![GitHub stars](https://img.shields.io/github/stars/karthikeyanV2K/GitDB?style=social)](https://github.com/karthikeyanV2K/GitDB)
+[![GitHub forks](https://img.shields.io/github/forks/karthikeyanV2K/GitDB?style=social)](https://github.com/karthikeyanV2K/GitDB)
+[![GitHub issues](https://img.shields.io/github/issues/karthikeyanV2K/GitDB)](https://github.com/karthikeyanV2K/GitDB/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/karthikeyanV2K/GitDB)](https://github.com/karthikeyanV2K/GitDB/pulls)
 
-## 🛠️ Installation
-- **Node.js 18+ required**
-- **npm 9+ recommended**
+## 📁 Files Created
 
-#### Global (recommended)
-```sh
-npm install -g gitdb-database
-```
+1. **`setup-sdk-environment.bat`** - Batch script for Windows
+2. **`setup-sdk-environment.ps1`** - PowerShell script (recommended)
+3. **`SETUP-README.md`** - Detailed documentation
 
-#### Local (for development)
-```sh
-npm install gitdb-database
-npx gitdb --help
-```
+## 🚀 Key Features
 
----
+### **Comprehensive Language Support**
+- **Node.js 18+** (JavaScript/TypeScript)
+- **Python 3.11** (Python SDK)
+- **Go 1.19+** (Go SDK)
+- **Java 11** (Java SDK with Maven)
+- **Rust** (Rust SDK with Cargo)
+- **PHP 8.1** (PHP SDK with Composer)
+- **Ruby** (Ruby SDK with Bundler)
+- **.NET 6 SDK** (C# SDK)
+
+### **Development Tools**
+- **Git** for version control
+- **Visual Studio Code** for editing
+- **Postman** for API testing
+- **cURL** for HTTP requests
+
+### **Smart Installation**
+- ✅ Checks if tools are already installed
+- ✅ Uses Chocolatey package manager
+- ✅ Installs all SDK dependencies
+- ✅ Configures environment variables
+- ✅ Verifies all installations
+
+### **Generated Scripts**
+After installation, you'll get:
+- **`build-all.ps1`** - Build all SDKs
+- **`test-all.ps1`** - Test all SDKs  
+- **`start-server.ps1`** - Start GitDB server
 
 ## 🎯 Usage
 
-### CLI Commands
-```sh
-gitdb set token <YOUR_GITHUB_TOKEN>
-gitdb set owner <YOUR_USERNAME>
-gitdb set repo <YOUR_REPO_NAME>
-gitdb use <collection>
-gitdb create-collection <name>
-gitdb insert '{"name": "test", "value": 123}'
-gitdb findone '{"name": "test"}'
-gitdb find <document_id>
-gitdb update <document_id> '{"name": "updated"}'
-gitdb updatemany '<query>' '<update>'
-gitdb delete <document_id>
-gitdb deletemany '<query>'
-gitdb count '<query>'
-gitdb distinct <field> [query]
+### Quick Start (PowerShell - Recommended)
+```powershell
+<code_block_to_apply_from>
 ```
 
----
-
-## 🗂️ Collections & Documents
-```sh
-gitdb create-collection users
-gitdb insert '{"name": "John Doe", "email": "john@example.com"}'
-gitdb findone '{"name": "John Doe"}'
-gitdb count '{"age": {"$gte": 25}}'
-gitdb update <id> '{"age": 31}'
-gitdb updatemany '{"age": {"$lt": 30}}' '{"status": "young"}'
-gitdb delete <id>
-gitdb deletemany '{"status": "inactive"}'
+### Alternative (Batch)
+```cmd
+# Run as Administrator
+setup-sdk-environment.bat
 ```
 
----
+## 🔧 What Happens
 
-## 🌐 REST API
-When the server is running, you can use the REST API:
+1. **Installs Chocolatey** (if not present)
+2. **Installs all languages** and their package managers
+3. **Installs development tools** (VS Code, Postman, etc.)
+4. **Configures environment variables** (PATH, GOPATH)
+5. **Installs SDK dependencies** for each language
+6. **Creates development scripts** for easy building/testing
+7. **Verifies all installations**
 
-### Collections
-```sh
-curl http://localhost:7896/api/collections
-curl -X POST http://localhost:7896/api/collections \
-  -H "Content-Type: application/json" \
-  -d '{"name": "users"}'
-```
+## 🌟 Benefits
 
-### Documents
-```sh
-curl -X POST http://localhost:7896/api/documents \
-  -H "Content-Type: application/json" \
-  -d '{"collection": "users", "document": {"name": "John", "age": 30}}'
-curl "http://localhost:7896/api/documents?collection=users&query={\"age\":{\"$gte\":25}}"
-curl -X PUT http://localhost:7896/api/documents/abc123 \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John Updated", "age": 31}'
-curl -X DELETE http://localhost:7896/api/documents/abc123
-```
+- **One-click setup** for all GitDB SDKs
+- **Cross-language development** environment
+- **Production-ready** toolchain
+- **Automated dependency management**
+- **Comprehensive verification**
+- **Easy maintenance** with generated scripts
 
----
+The scripts are designed to be safe, informative, and handle errors gracefully. They'll skip already installed tools and provide clear feedback throughout the process.
 
-# 🔌 Multi-Language Developer Cookbook
-
-Below are **full connection and query execution examples** for all major programming languages. Each section covers:
-- Connect to GitDB
-- Create collection
-- Insert document(s)
-- Find (by ID, by query)
-- Update
-- Delete
-- Count/distinct
-- Batch operations
-- Error handling
-
----
-
-## Node.js (Axios)
-```js
-const axios = require('axios');
-const gitdb = axios.create({ baseURL: 'http://localhost:7896/api' });
-// Connect
-gitdb.post('/collections/connect', { token, owner, repo });
-// Create Collection
-gitdb.post('/collections', { name: 'users' });
-// Insert Document
-gitdb.post('/documents', { collection: 'users', document: { name: 'Alice', age: 30 } });
-// Find by ID
-gitdb.get('/documents/abc123?collection=users');
-// Find by Query
-gitdb.get('/documents', { params: { collection: 'users', query: JSON.stringify({ age: { $gte: 25 } }) } });
-// Update
-gitdb.put('/documents/abc123', { age: 31 });
-// Delete
-gitdb.delete('/documents/abc123?collection=users');
-// Batch Insert
-const users = [{ name: 'Bob' }, { name: 'Carol' }];
-for (const user of users) {
-  await gitdb.post('/documents', { collection: 'users', document: user });
-}
-// Error Handling
-try {
-  await gitdb.post('/documents', { collection: 'users', document: { name: 'Alice' } });
-} catch (e) {
-  console.error(e.response?.data || e.message);
-}
-```
-
----
-
-## Python (requests)
-```python
-import requests, json
-s = requests.Session()
-s.headers.update({'Content-Type': 'application/json'})
-# Connect
-s.post('http://localhost:7896/api/collections/connect', json={'token': token, 'owner': owner, 'repo': repo})
-# Create Collection
-s.post('http://localhost:7896/api/collections', json={'name': 'users'})
-# Insert Document
-s.post('http://localhost:7896/api/documents', json={'collection': 'users', 'document': {'name': 'Alice', 'age': 30}})
-# Find by ID
-s.get('http://localhost:7896/api/documents/abc123', params={'collection': 'users'})
-# Find by Query
-s.get('http://localhost:7896/api/documents', params={'collection': 'users', 'query': json.dumps({'age': {'$gte': 25}})})
-# Update
-s.put('http://localhost:7896/api/documents/abc123', json={'age': 31})
-# Delete
-s.delete('http://localhost:7896/api/documents/abc123', params={'collection': 'users'})
-# Batch Insert
-users = [{'name': 'Bob'}, {'name': 'Carol'}]
-for user in users:
-    s.post('http://localhost:7896/api/documents', json={'collection': 'users', 'document': user})
-# Error Handling
-try:
-    s.post('http://localhost:7896/api/documents', json={'collection': 'users', 'document': {'name': 'Alice'}})
-except requests.exceptions.RequestException as e:
-    print('Error:', e)
-```
-
----
-
-## Java (OkHttp)
-```java
-OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
-Request request = new Request.Builder().url("http://localhost:7896/api/collections/connect").post(body).build();
-Response response = client.newCall(request).execute();
-```
-
----
-
-## C# (HttpClient)
-```csharp
-var client = new HttpClient();
-client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-await client.PostAsync("http://localhost:7896/api/collections/connect", content);
-```
-
----
-
-## PHP (cURL)
-```php
-        $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'http://localhost:7896/api/collections/connect');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        $response = curl_exec($ch);
-        curl_close($ch);
-```
-
----
-
-## Go (net/http)
-```go
-client := &http.Client{}
-req, _ := http.NewRequest("POST", "http://localhost:7896/api/collections/connect", bytes.NewBuffer(jsonData))
-    req.Header.Set("Content-Type", "application/json")
-resp, _ := client.Do(req)
-```
-
----
-
-## Ruby (Net::HTTP)
-```ruby
-require 'net/http'
-require 'json'
-uri = URI('http://localhost:7896/api/collections/connect')
-    http = Net::HTTP.new(uri.host, uri.port)
-request = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
-request.body = data.to_json
-    response = http.request(request)
-```
-
----
-
-## 🔍 Query Execution Examples (All Languages)
-- Data insertion, batch, find, update, delete, count, distinct, aggregation, advanced queries, error handling, performance tips, etc.
-- See the full examples above for each language.
-
----
-
-## 🔧 Service Management
-- **Windows:** Service auto-installed. Use `sc query GitDB` to check status.
-- **Linux:** `sudo systemctl status gitdb`
-- **macOS:** `launchctl list | grep gitdb`
-
----
-
-## 🔑 Configuration
-- **GitHub Token:**
-  - Create a Personal Access Token with `repo` scope.
-  - `gitdb set token <YOUR_GITHUB_TOKEN>`
-- **Repository:**
-  - `gitdb set owner <YOUR_USERNAME>`
-  - `gitdb set repo <YOUR_REPO_NAME>`
-
----
-
-## 🚨 Troubleshooting
-- **Service Not Starting:** Check service status (see above).
-- **Permission Issues:** Use `sudo` (Linux/macOS) or run as Administrator (Windows).
-- **Port in Use:** Change port with `gitdb server --port 7897`.
-- **GitHub API Limits:** Free accounts: 5,000 requests/hour.
-
----
-
-## 📚 API Reference
-
-### Shell Commands
-
-| Command                        | Description                        |
-|--------------------------------|------------------------------------|
-| `set token <token>`            | Set GitHub token                   |
-| `set owner <owner>`            | Set repository owner               |
-| `set repo <repo>`              | Set repository name                |
-| `use <collection>`             | Switch to collection               |
-| `create-collection <name>`     | Create new collection              |
-| `show collections`             | List all collections               |
-| `show docs`                    | Show documents in current collection|
-| `insert <JSON>`                | Insert document                    |
-| `find <id>`                    | Find document by ID                |
-| `findone <query>`              | Find first matching document       |
-| `count [query]`                | Count documents                    |
-| `update <id> <JSON>`           | Update document                    |
-| `updatemany <query> <JSON>`    | Update multiple documents          |
-| `delete <id>`                  | Delete document                    |
-| `deletemany <query>`           | Delete multiple documents          |
-| `distinct <field> [query]`     | Get distinct values                |
-| `help`                         | Show help                          |
-| `exit`                         | Exit shell                         |
-
-### Server options: `--port`, `--host`, `--config`
-
----
-
-## 🤝 Contributing
-- Fork, branch, PR welcome!
-
-## 📄 License
-MIT License
-
----
-
-## 🎉 What's New
-- Global npm package - Install with `npm install -g gitdb-database`
-- Node.js 18+ compatibility
-- Automatic service setup (Windows, Linux, macOS)
-- Cross-platform commands: `gitdb`, `gitdb-shell`, `gitdb-server`
-- Zero configuration
-- Production ready
-- REST API - Full HTTP API support
-- Interactive shell
-- GitHub integration
-- Comprehensive query examples (multi-language)
-- Advanced query operations (complex queries, aggregation, pagination)
-- Performance optimization tips
-- Batch insertion operations
-
----
-
-**Made with ❤️ by the GitDB Team**
+You can now run either script as Administrator to set up your complete GitDB SDK development environment! 🚀

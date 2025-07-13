@@ -1,478 +1,230 @@
-# GitDB 🚀
+# 🗂️ GitDB: Essential Guide & SDK Reference
 
-**GitHub-Backed NoSQL Database with CLI, GraphQL, AI, and SuperMode**
-
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](https://github.com/karthikeyanV2K/GitDB)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/typescript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
-
-> **Production-ready NoSQL database that stores data in Git repositories with advanced features like GraphQL, AI-powered queries, version control, and performance optimizations.**
-
-## ✨ Features
-
-### 🗄️ **Core Database**
-- **GitHub Integration** - Store data directly in Git repositories
-- **NoSQL Document Storage** - Flexible JSON document structure
-- **Collections & Documents** - Organize data with collections
-- **CRUD Operations** - Full Create, Read, Update, Delete support
-- **Query Language** - MongoDB-style query syntax
-
-### 🔧 **CLI Interface**
-- **Interactive Shell** - Command-line database operations
-- **Server Management** - Start, stop, monitor server
-- **Batch Operations** - Bulk data processing
-- **Schema Validation** - Data integrity enforcement
-- **Session Management** - Persistent configurations
-
-### 🌐 **API & Integration**
-- **REST API** - HTTP endpoints for programmatic access
-- **GraphQL API** - Dynamic schema with hot reload
-- **Real-time Updates** - Live data synchronization
-- **WebSocket Support** - Real-time communication
-
-### 🤖 **AI & Advanced Features**
-- **AI-Powered Queries** - Natural language database queries
-- **SuperMode** - Performance optimizations
-- **Auto-completion** - Intelligent command suggestions
-- **Query Optimization** - Automatic query improvement
-- **Schema Inference** - Automatic field type detection
-
-### 📊 **Version Control & History**
-- **Full Git History** - Every change tracked
-- **Rollback Capability** - Revert to any previous version
-- **Branch Support** - Experimental data branches
-- **Merge Resolution** - Conflict handling
-- **Audit Trail** - Complete operation history
-
-### ⚡ **Performance & Scalability**
-- **Caching Strategies** - Multi-level caching
-- **Connection Pooling** - Efficient resource management
-- **Batch Processing** - Bulk operation optimization
-- **Compression** - Data size reduction
-- **Delta Encoding** - Efficient updates
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Install globally
-npm install -g gitdb-database
-
-# Or install locally
-npm install gitdb
-```
-
-### Setup
-
-1. **Create a GitHub repository** for your data
-2. **Generate a Personal Access Token** with `repo` permissions
-3. **Set environment variables**:
-
-```bash
-export GITHUB_TOKEN=your_personal_access_token
-export GITHUB_OWNER=your_github_username
-export GITHUB_REPO=your_data_repository
-```
-
-### Basic Usage
-
-```bash
-# Connect to your database
-gitdb connect -t your_token -o your_owner -r your_repo
-
-# Create a collection
-gitdb create-collection users
-
-# Add a document
-gitdb create-doc users '{"name":"John","age":30,"email":"john@example.com"}'
-
-# Query documents
-gitdb find users '{"age":{"$gt":25}}'
-
-# Start the server
-gitdb server
-```
-
-## 📖 Documentation
-
-### CLI Commands
-
-#### Basic Operations
-```bash
-# Database connection
-gitdb connect -t <token> -o <owner> -r <repo>
-
-# Collections
-gitdb collections
-gitdb create-collection <name>
-gitdb delete-collection <name>
-
-# Documents
-gitdb documents <collection>
-gitdb create-doc <collection> <json-data>
-gitdb read-doc <collection> <id>
-gitdb update-doc <collection> <id> <json-data>
-gitdb delete-doc <collection> <id>
-
-# Queries
-gitdb find <collection> <query>
-```
-
-#### Server Management
-```bash
-# Server control
-gitdb server                    # Start server (foreground)
-gitdb server-start             # Start server (background)
-gitdb server-stop              # Stop server
-gitdb server-status            # Check server status
-gitdb server-restart           # Restart server
-gitdb server-log               # View server logs
-```
-
-#### Advanced Features
-```bash
-# Version control
-gitdb version history <collection>
-gitdb version rollback <collection> --commit <hash>
-
-# SuperMode optimizations
-gitdb supermode enable --cache-size 1000
-gitdb supermode disable
-gitdb supermode stats
-
-# GraphQL management
-gitdb graphql schema
-gitdb graphql regen-schema
-
-# Reference resolution
-gitdb resolve <collection> <id>
-
-# Interactive shell
-gitdb shell
-```
-
-### API Endpoints
-
-#### REST API (Port 7896)
-```bash
-# Health check
-GET /health
-
-# Collections
-GET    /api/v1/collections
-POST   /api/v1/collections
-DELETE /api/v1/collections/:name
-
-# Documents
-GET    /api/v1/collections/:name/documents
-POST   /api/v1/collections/:name/documents
-GET    /api/v1/collections/:name/documents/:id
-PUT    /api/v1/collections/:name/documents/:id
-DELETE /api/v1/collections/:name/documents/:id
-```
-
-#### GraphQL API
-```graphql
-# Get collections
-query {
-  collections
-}
-
-# Get documents
-query {
-  documents(collection: "users") {
-    _id
-    name
-    age
-  }
-}
-
-# Get specific document
-query {
-  document(collection: "users", id: "abc123") {
-    _id
-    name
-    age
-  }
-}
-```
-
-### Query Examples
-
-```bash
-# Find users older than 25
-gitdb find users '{"age":{"$gt":25}}'
-
-# Find active users with specific roles
-gitdb find users '{"$and":[{"active":true},{"role":{"$in":["admin","moderator"]}}]}'
-
-# Find documents with non-null email
-gitdb find users '{"email":{"$ne":null}}'
-
-# Complex queries
-gitdb find products '{"$or":[{"category":"electronics"},{"price":{"$lt":100}}]}'
-```
-
-## 🏗️ Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   CLI Interface │    │   REST API      │    │   GraphQL API   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   GitDB Core    │
-                    │   Database      │
-                    └─────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   GitHub API    │
-                    │   (Git Storage) │
-                    └─────────────────┘
-```
-
-## 🔧 Development
-
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- GitHub account with Personal Access Token
-
-### Setup Development Environment
-
-```bash
-# Clone repository
-git clone https://github.com/karthikeyanV2K/GitDB.git
-cd GitDB
-
-# Install dependencies
-npm install
-
-# Build project
-npm run build
-
-# Run in development
-npm run dev
-
-# Run tests
-npm test
-```
-
-### Project Structure
-```
-gitdb/
-├── src/
-│   ├── api/           # REST API endpoints
-│   ├── core/          # Core database logic
-│   ├── ai/            # AI-powered features
-│   ├── cli.ts         # CLI entry point
-│   ├── server.ts      # Server entry point
-│   ├── shell.ts       # Interactive shell
-│   └── graphql.ts     # GraphQL schema and resolvers
-├── bin/               # Compiled binaries
-├── dist/              # TypeScript output
-├── assets/            # Icons and images
-└── package.json       # Dependencies and scripts
-```
-
-## 🚀 Deployment
-
-### Production Setup
-
-```bash
-# Set production environment
-export NODE_ENV=production
-export PORT=7896
-export GITHUB_TOKEN=your_token
-
-# Start server
-gitdb server
-```
-
-### Docker Deployment
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist/ ./dist/
-EXPOSE 7896
-CMD ["node", "dist/server.js"]
-```
-
-### Cloud Deployment
-
-- **AWS**: EC2, ECS, or Lambda
-- **Google Cloud**: Cloud Run or App Engine
-- **Azure**: App Service or Container Instances
-- **Heroku**: Direct deployment
-
-## 🔒 Security
-
-### Authentication
-- GitHub Personal Access Token required
-- Repository-level access control
-- Environment variable configuration
-
-### Authorization
-- Local-only admin operations
-- Repository permission validation
-- Input sanitization and validation
-
-### Network Security
-- CORS configuration
-- Request logging and monitoring
-- Rate limiting support
-- HTTPS/TLS ready
-
-## 📊 Performance
-
-### Optimizations
-- **SuperMode**: Advanced caching and compression
-- **Batch Operations**: Bulk data processing
-- **Connection Pooling**: Efficient resource management
-- **Query Optimization**: Automatic query improvement
-- **Delta Encoding**: Efficient update strategies
-
-### Monitoring
-- Health check endpoints
-- Performance metrics
-- Resource usage tracking
-- Error monitoring and alerting
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Add tests for new features
-- Update documentation
-- Maintain backward compatibility
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **GitHub API** for repository storage
-- **Apollo GraphQL** for GraphQL implementation
-- **Express.js** for REST API framework
-- **TypeScript** for type safety
-- **Node.js** for runtime environment
-
-## 📞 Support
-
-- **Documentation**: [Complete Documentation](GITDB-COMPLETE-DOCUMENTATION.txt)
-- **Issues**: [GitHub Issues](https://github.com/karthikeyanV2K/GitDB/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/karthikeyanV2K/GitDB/discussions)
-- **Wiki**: [Project Wiki](https://github.com/karthikeyanV2K/GitDB/wiki)
-
-## 🎯 Roadmap
-
-### Upcoming Features
-- [ ] Real-time subscriptions
-- [ ] Advanced analytics
-- [ ] Machine learning integration
-- [ ] Multi-region support
-- [ ] Enhanced security features
-- [ ] Mobile SDK
-- [ ] Desktop application
-- [ ] Cloud hosting service
-
-### Version History
-- **v2.2.0** - Production ready with GraphQL, SuperMode, and AI
-- **v2.1.0** - Major rewrite with TypeScript and advanced features
-- **v1.0.0** - Initial release with basic functionality
+**Production-ready NoSQL database that stores data in Git repositories with advanced features like GraphQL, AI-powered queries, version control, and performance optimizations.**
 
 ---
 
-**Made with ❤️ by the AFOT Team**
+## 🚀 Quick Links
 
-[![GitHub stars](https://img.shields.io/github/stars/karthikeyanV2K/GitDB?style=social)](https://github.com/karthikeyanV2K/GitDB)
-[![GitHub forks](https://img.shields.io/github/forks/karthikeyanV2K/GitDB?style=social)](https://github.com/karthikeyanV2K/GitDB)
-[![GitHub issues](https://img.shields.io/github/issues/karthikeyanV2K/GitDB)](https://github.com/karthikeyanV2K/GitDB/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/karthikeyanV2K/GitDB)](https://github.com/karthikeyanV2K/GitDB/pulls)
+| SDK / Language   | Docs / Repo                                                                 | Package Registry                                  |
+|------------------|-----------------------------------------------------------------------------|---------------------------------------------------|
+| **JavaScript/TS**| [gitdb-client (npm)](https://www.npmjs.com/package/gitdb-client)            | [Docs](https://www.npmjs.com/package/gitdb-client) |
+| **Go**           | [gitdb-go-client (GitHub)](https://github.com/karthikeyanV2K/gitdb-go-client)| [GoDoc](https://pkg.go.dev/github.com/karthikeyanV2K/gitdb-go-client) |
+| **PHP**          | [gitdb-php-client (GitHub)](https://github.com/karthikeyanV2K/gitdb-php-client) | [Packagist](https://packagist.org/packages/gitdb/client) |
+| **Rust**         | [gitdb-client (crates.io)](https://crates.io/crates/gitdb-client)           | [Docs](https://docs.rs/gitdb-client)              |
+| **Python**       | [gitdb-client (PyPI)](https://pypi.org/project/gitdb-client/)               | [Docs](https://pypi.org/project/gitdb-client/)    |
+| **Ruby**         | [gitdb-client (RubyGems)](https://rubygems.org/gems/gitdb-client)           | [Docs](https://rubygems.org/gems/gitdb-client)    |
 
-## 📁 Files Created
+---
 
-1. **`setup-sdk-environment.bat`** - Batch script for Windows
-2. **`setup-sdk-environment.ps1`** - PowerShell script (recommended)
-3. **`SETUP-README.md`** - Detailed documentation
+## 📝 GitDB CLI Command Table
 
-## 🚀 Key Features
+| Command | Usage & Options | Description |
+|---------|-----------------|-------------|
+| **Connect** | `gitdb connect -t <token> -o <owner> -r <repo>` | Connect CLI to a GitHub repo as your database |
+| **List Collections** | `gitdb collections` | List all collections (tables) |
+| **Create Collection** | `gitdb create-collection <name>` | Create a new collection |
+| **Delete Collection** | `gitdb delete-collection <name>` | Delete a collection and all its documents |
+| **List Documents** | `gitdb documents <collection>` | List all documents in a collection |
+| **Create Document** | `gitdb create-doc <collection> <json-data>` | Add a new document to a collection |
+| **Read Document** | `gitdb read-doc <collection> <id>` | Read a document by its ID |
+| **Update Document** | `gitdb update-doc <collection> <id> <json-data>` | Update a document by its ID |
+| **Delete Document** | `gitdb delete-doc <collection> <id>` | Delete a document by its ID |
+| **Find Documents** | `gitdb find <collection> <query>` | Find documents matching a MongoDB-style query |
+| **Find One Document** | `gitdb findone <collection> <query>` | Find a single document matching the query |
+| **Version History** | `gitdb version history <collection>` | Show Git commit history for a collection |
+| **Rollback Version** | `gitdb version rollback <collection> --commit <hash>` | Roll back a collection to a previous commit |
+| **Start Server** | `gitdb server` | Start the GitDB server (REST/GraphQL API) |
+| **Start Server (bg)** | `gitdb server-start` | Start the server in the background |
+| **Stop Server** | `gitdb server-stop` | Stop the server |
+| **Server Status** | `gitdb server-status` | Check the server status |
+| **Enable SuperMode** | `gitdb supermode enable --cache-size <n>` | Enable performance optimizations |
+| **Show GraphQL Schema** | `gitdb graphql schema` | Show the current GraphQL schema |
+| **Interactive Shell** | `gitdb shell` | Start an interactive shell for running commands |
+| **Shell: Set Token** | `set token <token>` | Set GitHub token (in shell) |
+| **Shell: Set Owner** | `set owner <owner>` | Set repository owner (in shell) |
+| **Shell: Set Repo** | `set repo <repo>` | Set repository name (in shell) |
+| **Shell: Use Collection** | `use <collection>` | Switch to a collection (in shell) |
+| **Shell: Show Collections** | `show collections` | List all collections (in shell) |
+| **Shell: Show Docs** | `show docs` | List documents in current collection (in shell) |
+| **Shell: Insert** | `insert <JSON>` | Insert a document (in shell) |
+| **Shell: Find by ID** | `find <id>` | Find document by ID (in shell) |
+| **Shell: Find by Query** | `findone <json-query>` | Find document by query (in shell) |
+| **Shell: Count** | `count [json-query]` | Count documents (optionally by query, in shell) |
+| **Shell: Update** | `update <id> <JSON>` | Update document by ID (in shell) |
+| **Shell: Delete** | `delete <id>` | Delete document by ID (in shell) |
+| **Shell: Help** | `help` | Show help (in shell) |
+| **Shell: Exit** | `exit` | Exit the shell |
 
-### **Comprehensive Language Support**
-- **Node.js 18+** (JavaScript/TypeScript)
-- **Python 3.11** (Python SDK)
-- **Go 1.19+** (Go SDK)
-- **Java 11** (Java SDK with Maven)
-- **Rust** (Rust SDK with Cargo)
-- **PHP 8.1** (PHP SDK with Composer)
-- **Ruby** (Ruby SDK with Bundler)
-- **.NET 6 SDK** (C# SDK)
+---
 
-### **Development Tools**
-- **Git** for version control
-- **Visual Studio Code** for editing
-- **Postman** for API testing
-- **cURL** for HTTP requests
+## 🏁 Getting Started
 
-### **Smart Installation**
-- ✅ Checks if tools are already installed
-- ✅ Uses Chocolatey package manager
-- ✅ Installs all SDK dependencies
-- ✅ Configures environment variables
-- ✅ Verifies all installations
+1. **Create a GitHub repo** for your data.
+2. **Generate a GitHub token** with `repo` permissions.
+3. **Install the CLI:**
+```bash
+npm install -g gitdb-database
+   ```
+4. **Connect:**
+```bash
+   gitdb connect -t <token> -o <owner> -r <repo>
+   ```
 
-### **Generated Scripts**
-After installation, you'll get:
-- **`build-all.ps1`** - Build all SDKs
-- **`test-all.ps1`** - Test all SDKs  
-- **`start-server.ps1`** - Start GitDB server
+---
 
-## 🎯 Usage
+# 🗂️ GitDB Command Reference & Workflow Guide
 
-### Quick Start (PowerShell - Recommended)
-```powershell
-<code_block_to_apply_from>
+## 1. **GitDB CLI: Core Commands**
+
+### **Database Connection & Setup**
+- `gitdb connect -t <token> -o <owner> -r <repo>`
+  - Connects your CLI to a GitHub repository as your database.
+  - **Example:**  
+    `gitdb connect -t ghp_abc123 -o myuser -r mydb-repo`
+
+### **Collection Management**
+- `gitdb collections` — List all collections
+- `gitdb create-collection <name>` — Create a new collection
+- `gitdb delete-collection <name>` — Delete a collection
+
+### **Document Operations**
+- `gitdb documents <collection>` — List all documents in a collection
+- `gitdb create-doc <collection> <json-data>` — Add a new document
+- `gitdb read-doc <collection> <id>` — Read a document by ID
+- `gitdb update-doc <collection> <id> <json-data>` — Update a document
+- `gitdb delete-doc <collection> <id>` — Delete a document by ID
+
+### **Querying**
+- `gitdb find <collection> <query>` — Find documents matching a MongoDB-style query
+- `gitdb findone <collection> <query>` — Find a single document matching the query
+
+### **Version Control & History**
+- `gitdb version history <collection>` — Show Git commit history for a collection
+- `gitdb version rollback <collection> --commit <hash>` — Roll back a collection to a previous commit
+
+### **Server Management**
+- `gitdb server` — Start the GitDB server (REST/GraphQL API)
+- `gitdb server-start` / `gitdb server-stop` / `gitdb server-status` — Manage the server process
+
+### **Advanced Features**
+- `gitdb supermode enable --cache-size <n>` — Enable performance optimizations
+- `gitdb graphql schema` — Show the current GraphQL schema
+- `gitdb shell` — Start an interactive shell for running commands
+
+---
+
+## 2. **Typical GitDB Workflow**
+
+### **A. Initial Setup**
+1. **Create a GitHub repo** for your data.
+2. **Generate a GitHub token** with `repo` permissions.
+3. **Connect** using the CLI:
+```bash
+gitdb connect -t <token> -o <owner> -r <repo>
+   ```
+
+### **B. Creating Collections & Documents**
+1. **Create collections** for your data types:
+```bash
+   gitdb create-collection users
+   gitdb create-collection products
+   ```
+2. **Insert documents**:
+```bash
+   gitdb create-doc users '{"name":"Alice","email":"alice@example.com"}'
+   gitdb create-doc products '{"name":"Laptop","price":999.99}'
+   ```
+
+### **C. Querying & Updating Data**
+- **Find users over 25:**
+```bash
+  gitdb find users '{"age":{"$gt":25}}'
+  ```
+- **Update a user:**
+  ```bash
+  gitdb update-doc users <id> '{"email":"new@email.com"}'
+  ```
+- **Delete a product:**
+```bash
+  gitdb delete-doc products <id>
+  ```
+
+### **D. Version Control**
+- **View history:**
+  ```bash
+  gitdb version history users
+  ```
+- **Rollback:**
+```bash
+  gitdb version rollback users --commit <hash>
+  ```
+
+### **E. Server/API Usage**
+- **Start the server:**
+```bash
+gitdb server
+```
+- **Access REST API:**  
+  `http://localhost:7896/api/v1/collections/users`
+- **Access GraphQL API:**  
+  `http://localhost:7896/graphql`
+
+---
+
+## 3. **Interactive Shell Commands**
+
+Inside `gitdb shell`, you can use:
+- `set token <token>`
+- `set owner <owner>`
+- `set repo <repo>`
+- `use <collection>`
+- `create-collection <name>`
+- `show collections`
+- `show docs`
+- `insert <JSON>`
+- `find <id>`
+- `findone <json-query>`
+- `count [json-query]`
+- `update <id> <JSON>`
+- `delete <id>`
+- `help`
+- `exit`
+
+---
+
+## 4. **SDK Usage Example (JavaScript/TypeScript)**
+
+```js
+import { GitDBClient } from 'gitdb-client';
+
+const client = new GitDBClient({
+  owner: 'your-github-username',
+  repo: 'your-repo',
+  token: 'your-github-token',
+});
+
+// Insert a document
+await client.insert('users', { name: 'Alice', email: 'alice@example.com' });
+
+// Query documents
+const users = await client.findOne('users', { name: 'Alice' });
+
+// Update a document
+await client.update('users', users[0].id, { age: 31 });
+
+// Delete a document
+await client.delete('users', users[0].id);
 ```
 
-### Alternative (Batch)
-```cmd
-# Run as Administrator
-setup-sdk-environment.bat
-```
+---
 
-## 🔧 What Happens
+## 5. **Where to Find More**
 
-1. **Installs Chocolatey** (if not present)
-2. **Installs all languages** and their package managers
-3. **Installs development tools** (VS Code, Postman, etc.)
-4. **Configures environment variables** (PATH, GOPATH)
-5. **Installs SDK dependencies** for each language
-6. **Creates development scripts** for easy building/testing
-7. **Verifies all installations**
+- **Full Book & Advanced Docs:** [GITDB-Guide.md (Full Book)](https://github.com/karthikeyanV2K/GitDB/blob/main/GITDB-Guide.md)
+- **SDK Docs:** See links in the table above for each language
+- **API Reference:** [GITDB-COMPLETE-BOOK.md](GITDB-COMPLETE-BOOK.md) and server endpoints
 
-## 🌟 Benefits
+---
 
-- **One-click setup** for all GitDB SDKs
-- **Cross-language development** environment
-- **Production-ready** toolchain
-- **Automated dependency management**
-- **Comprehensive verification**
-- **Easy maintenance** with generated scripts
-
-The scripts are designed to be safe, informative, and handle errors gracefully. They'll skip already installed tools and provide clear feedback throughout the process.
-
-You can now run either script as Administrator to set up your complete GitDB SDK development environment! 🚀
+**If you want a deep-dive into any specific command, workflow, or integration, just ask!**

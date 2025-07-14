@@ -791,7 +791,7 @@ GitDB supports all JSON data types:
 #### 1. **Flat Structure** (Simple Data)
 ```json
 {
-  "id": "user-123",
+  "id": "user1",
   "name": "John Doe",
   "email": "john@example.com",
   "age": 30,
@@ -802,7 +802,7 @@ GitDB supports all JSON data types:
 #### 2. **Nested Structure** (Complex Data)
 ```json
 {
-  "id": "user-123",
+  "id": "user1",
   "profile": {
     "personal": {
       "name": "John Doe",
@@ -905,46 +905,68 @@ ghi9012 Delete user John Doe
 
 ## Installation & Setup {#installation}
 
-```json
-// users/user1.json
-{
-  "id": "user1",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "created_at": "2024-01-15T10:30:00Z",
-  "profile": {
-    "age": 30,
-    "location": "New York",
-    "preferences": ["reading", "coding", "travel"]
-  }
-}
-```
-
-### Versioning
-Every change to a document creates a new Git commit, preserving the complete history:
-
-```
-commit abc123: Update user1 email
-commit def456: Add user1 profile
-commit ghi789: Create user1
-```
-
-### Synchronization
-GitDB uses Git's push/pull mechanism to synchronize data across clients:
-
-1. **Local Changes**: Made to JSON files
-2. **Commit**: Changes are committed to Git
-3. **Push**: Changes are pushed to remote repository
-4. **Pull**: Other clients pull changes automatically
-
----
-
-## Installation & Setup {#installation}
-
 ### Prerequisites
 - Git installed on your system
 - Node.js 16+ (for CLI and server)
-- GitHub/GitLab account (for remote storage)
+- GitHub account with a repository
+- GitHub personal access token with `repo` permissions
+
+### Step 1: Create Your Database Repository
+
+**On GitHub:**
+1. Go to [GitHub.com](https://github.com) and sign in
+2. Click "New repository" or the "+" icon
+3. Name your repository (e.g., `my-database`, `user-data`, `project-db`)
+4. Make it **Private** (recommended for data security)
+5. Don't initialize with README (GitDB will handle this)
+6. Click "Create repository"
+
+### Step 2: Generate GitHub Token
+
+**On GitHub:**
+1. Go to Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Give it a name like "GitDB Database Access"
+4. Select these permissions:
+   - ✅ `repo` (Full control of private repositories)
+   - ✅ `workflow` (Update GitHub Action workflows)
+5. Click "Generate token"
+6. **Copy the token** (starts with `ghp_`) - you won't see it again!
+
+### Step 3: Install GitDB CLI
+
+```bash
+# Install the GitDB command-line tool
+npm install -g gitdb-database
+
+# Verify installation
+gitdb --version
+```
+
+### Step 4: Connect to Your Database
+
+```bash
+# Connect GitDB to your GitHub repository
+gitdb connect -t ghp_your_token_here -o yourusername -r my-database
+
+# Example:
+gitdb connect -t ghp_abc123def456 -o johnsmith -r user-database
+```
+
+**What this does:**
+- Connects GitDB to your GitHub repository
+- Initializes the database structure
+- Creates a README file explaining the database
+- Sets up the connection for future operations
+
+### Step 5: Verify Connection
+
+```bash
+# List collections (should be empty initially)
+gitdb collections
+
+# Should show: "📁 No collections found"
+```
 
 ---
 
@@ -1009,28 +1031,37 @@ Let's plan what information we need to store:
 **Install GitDB CLI:**
 ```bash
 # Install GitDB command-line tool
-npm install -g gitdb-cli
+npm install -g gitdb-database
 
 # Verify installation
 gitdb --version
 ```
 
-**Create Your First Database:**
+**Create GitHub Repository:**
+1. Go to GitHub.com
+2. Create a new repository called `my-online-store`
+3. Make it private
+4. Copy the repository URL
+
+**Generate GitHub Token:**
+1. Go to GitHub Settings → Developer settings → Personal access tokens
+2. Generate new token with `repo` permissions
+3. Copy the token (starts with `ghp_`)
+
+**Connect to Your Database:**
 ```bash
-# Create a new database directory
-gitdb init my-online-store
+# Connect GitDB to your GitHub repository
+gitdb connect -t ghp_your_token_here -o yourusername -r my-online-store
 
-# Navigate into your database
-cd my-online-store
-
-# Check what was created
-ls -la
+# Example:
+gitdb connect -t ghp_abc123def456 -o johnsmith -r my-online-store
 ```
 
 **What just happened?**
-- GitDB created a new directory called `my-online-store`
-- It initialized a Git repository inside
-- It set up the basic structure for your database
+- GitDB connected to your GitHub repository
+- It initialized the database structure
+- It created a README file explaining the database
+- Your repository is now ready to store data
 
 #### **Step 4: Creating Your First Collection**
 
@@ -1040,7 +1071,7 @@ ls -la
 gitdb create-collection users
 
 # Verify it was created
-gitdb show collections
+gitdb collections
 ```
 
 **What is a collection?**
@@ -1053,16 +1084,16 @@ gitdb show collections
 **Add a User:**
 ```bash
 # Add your first user
-gitdb insert users '{"name": "John Doe", "email": "john@example.com", "phone": "123-456-7890"}'
+gitdb create-doc users '{"name": "John Doe", "email": "john@example.com", "phone": "123-456-7890"}'
 
 # Check what was added
-gitdb show docs
+gitdb documents users
 ```
 
 **What just happened?**
 - GitDB created a JSON file for John Doe
 - It automatically generated a unique ID
-- It stored the file in the users collection
+- It stored the file in the users collection on GitHub
 - It created a Git commit to track this change
 
 #### **Step 6: Adding More Data**
@@ -1073,9 +1104,9 @@ gitdb show docs
 gitdb create-collection products
 
 # Add some products
-gitdb insert products '{"name": "Laptop", "price": 999.99, "category": "Electronics"}'
-gitdb insert products '{"name": "Mouse", "price": 29.99, "category": "Electronics"}'
-gitdb insert products '{"name": "Keyboard", "price": 79.99, "category": "Electronics"}'
+gitdb create-doc products '{"name": "Laptop", "price": 999.99, "category": "Electronics"}'
+gitdb create-doc products '{"name": "Mouse", "price": 29.99, "category": "Electronics"}'
+gitdb create-doc products '{"name": "Keyboard", "price": 79.99, "category": "Electronics"}'
 ```
 
 **Add Orders:**
@@ -1084,30 +1115,30 @@ gitdb insert products '{"name": "Keyboard", "price": 79.99, "category": "Electro
 gitdb create-collection orders
 
 # Add an order
-gitdb insert orders '{"user_id": "john-doe", "items": ["laptop-001"], "total": 999.99, "status": "pending"}'
+gitdb create-doc orders '{"user_id": "john-doe", "items": ["laptop-001"], "total": 999.99, "status": "pending"}'
 ```
 
 #### **Step 7: Viewing Your Data**
 
 **List All Collections:**
 ```bash
-gitdb show collections
+gitdb collections
 # Output: users, products, orders
 ```
 
 **View Documents in a Collection:**
 ```bash
-gitdb show docs
-# Shows all documents in current collection
+gitdb documents users
+# Shows all documents in users collection
 ```
 
 **Find Specific Documents:**
 ```bash
-# Find a user by ID
-gitdb find users john-doe
+# Find a user by ID (use the ID from the create-doc output)
+gitdb read-doc users john-doe
 
 # Find products in Electronics category
-gitdb findone products '{"category": "Electronics"}'
+gitdb find products '{"category": "Electronics"}'
 ```
 
 #### **Step 8: Updating Data**
@@ -1115,42 +1146,29 @@ gitdb findone products '{"category": "Electronics"}'
 **Update a User:**
 ```bash
 # Update John's phone number
-gitdb update users john-doe '{"phone": "987-654-3210"}'
+gitdb update-doc users john-doe '{"phone": "987-654-3210"}'
 
 # Check the update
-gitdb find users john-doe
+gitdb read-doc users john-doe
 ```
 
-#### **Step 9: Connecting to Remote Storage**
+#### **Step 9: Your Data is Already on GitHub!**
 
-**Create GitHub Repository:**
-1. Go to GitHub.com
-2. Create a new repository called `my-online-store`
-3. Copy the repository URL
-
-**Connect Your Database:**
-```bash
-# Add remote repository
-gitdb remote add origin https://github.com/yourusername/my-online-store.git
-
-# Push your data to GitHub
-gitdb push -u origin main
-```
-
-**What this does:**
-- Your data is now stored on GitHub
+**What this means:**
+- Your data is automatically stored on GitHub
 - It's backed up and accessible from anywhere
-- Others can collaborate on your data
+- Others can collaborate on your data (if you give them access)
 - You have a complete history of all changes
+- You can view your data directly on GitHub.com
 
 #### **Step 10: Congratulations! 🎉**
 
 You've just created your first GitDB database! Here's what you accomplished:
 
-✅ **Created a database** with 3 collections  
-✅ **Added real data** for users, products, and orders  
+✅ **Connected to GitHub** as your database  
+✅ **Created collections** for users, products, and orders  
+✅ **Added real data** and saw it stored on GitHub  
 ✅ **Updated data** and saw changes tracked  
-✅ **Connected to GitHub** for backup and collaboration  
 ✅ **Learned basic commands** for managing your data  
 
 #### **What's Next?**
@@ -1168,31 +1186,32 @@ Now that you have the basics, you can:
 
 ### Quick Start
 
-1. **Install GitDB CLI**
+1. **Create GitHub Repository**
+   - Go to GitHub.com and create a new private repository
+   - Name it something like `my-database`
+
+2. **Generate GitHub Token**
+   - Go to GitHub Settings → Developer settings → Personal access tokens
+   - Generate token with `repo` permissions
+
+3. **Install GitDB CLI**
 ```bash
-npm install -g gitdb-cli
+npm install -g gitdb-database
 ```
 
-2. **Initialize a Database**
+4. **Connect to Your Database**
 ```bash
-gitdb init my-database
-cd my-database
+gitdb connect -t ghp_your_token_here -o yourusername -r my-database
 ```
 
-3. **Create Your First Collection**
+5. **Create Your First Collection**
 ```bash
 gitdb create-collection users
 ```
 
-4. **Insert Your First Document**
+6. **Insert Your First Document**
 ```bash
-gitdb insert users '{"name": "John Doe", "email": "john@example.com"}'
-```
-
-5. **Connect to Remote Repository**
-```bash
-gitdb remote add origin https://github.com/yourusername/my-database.git
-gitdb push -u origin main
+gitdb create-doc users '{"name": "John Doe", "email": "john@example.com"}'
 ```
 
 ### Server Setup (Optional)
@@ -1212,25 +1231,61 @@ gitdb server
 
 ### Basic Commands
 
-#### Database Management
+#### Database Connection
 ```bash
-# Initialize new database
-gitdb init <database-name>
+# Connect to GitHub repository as database
+gitdb connect -t <token> -o <owner> -r <repo>
 
-# Clone existing database
-gitdb clone <repository-url>
+# Example:
+gitdb connect -t ghp_abc123def456 -o johnsmith -r my-database
+```
 
-# Check status
-gitdb status
+#### Collection Management
+```bash
+# List all collections
+gitdb collections
 
-# Commit changes
-gitdb commit -m "Update user data"
+# Create new collection
+gitdb create-collection <name>
 
-# Push changes
-gitdb push
+# Delete collection
+gitdb delete-collection <name>
+```
 
-# Pull changes
-gitdb pull
+#### Document Operations
+```bash
+# List documents in collection
+gitdb documents <collection>
+
+# Create new document
+gitdb create-doc <collection> <json-data>
+
+# Read document by ID
+gitdb read-doc <collection> <id>
+
+# Update document
+gitdb update-doc <collection> <id> <json-data>
+
+# Delete document
+gitdb delete-doc <collection> <id>
+```
+
+#### Querying
+```bash
+# Find documents by query
+gitdb find <collection> <json-query>
+
+# Find one document
+gitdb findone <collection> <json-query>
+```
+
+#### Version Control
+```bash
+# Show commit history
+gitdb version history <collection>
+
+# Rollback to previous version
+gitdb version rollback <collection> --commit <hash>
 ```
 
 ---
@@ -2627,6 +2682,1557 @@ gitdb optimize
 
 ---
 
+## GitDB Shell: Interactive Command Line Interface {#shell-interface}
+
+### 🎯 **Complete Shell Command Reference**
+
+The GitDB shell provides an interactive command-line interface for managing your databases. It's like having a database console that understands Git operations.
+
+#### **Starting the Shell**
+
+```bash
+# Start interactive shell
+gitdb shell
+
+# Or use the alias
+gitdb-shell
+
+# Start with specific repository
+gitdb shell --repo my-database
+
+# Start with debug mode
+gitdb shell --debug
+```
+
+#### **Shell Environment Setup**
+
+```bash
+# Set GitHub token for authentication
+set token ghp_your_github_token_here
+
+# Set repository owner
+set owner yourusername
+
+# Set repository name
+set repo my-database
+
+# Verify configuration
+show config
+```
+
+#### **Complete Command Reference**
+
+##### **Configuration Commands**
+
+```bash
+# Set GitHub personal access token
+set token <token>
+# Example: set token ghp_abc123def456
+
+# Set repository owner (GitHub username)
+set owner <owner>
+# Example: set owner johnsmith
+
+# Set repository name
+set repo <repo>
+# Example: set repo my-project-db
+
+# Show current configuration
+show config
+# Output: Token: ghp_***, Owner: johnsmith, Repo: my-project-db
+
+# Clear configuration
+clear config
+```
+
+##### **Collection Management Commands**
+
+```bash
+# Create a new collection
+create-collection <name>
+# Example: create-collection users
+
+# List all collections
+show collections
+# Output: users, products, orders
+
+# Switch to a specific collection
+use <collection>
+# Example: use users
+
+# Show current collection
+show current
+# Output: Current collection: users
+
+# Delete a collection (with confirmation)
+delete-collection <name>
+# Example: delete-collection old-data
+```
+
+##### **Document Operations Commands**
+
+```bash
+# Insert a new document
+insert <json-document>
+# Example: insert {"name": "John Doe", "email": "john@example.com"}
+
+# Insert with custom ID
+insert {"_id": "john-doe", "name": "John Doe", "email": "john@example.com"}
+
+# Find document by ID
+find <id>
+# Example: find john-doe
+
+# Find documents by query
+findone <json-query>
+# Example: findone {"email": "john@example.com"}
+
+# Find with complex queries
+findone {"age": {"$gt": 25}, "status": "active"}
+
+# Count documents
+count [json-query]
+# Example: count
+# Example: count {"status": "active"}
+
+# Update document
+update <id> <json-update>
+# Example: update john-doe {"age": 30}
+
+# Update multiple fields
+update john-doe {"age": 30, "status": "premium"}
+
+# Delete document
+delete <id>
+# Example: delete john-doe
+
+# Delete multiple documents
+deletemany <json-query>
+# Example: deletemany {"status": "inactive"}
+
+# Show all documents in current collection
+show docs
+# Shows formatted list of all documents
+
+# Show document count
+show count
+# Output: 15 documents in users collection
+```
+
+##### **Advanced Query Commands**
+
+```bash
+# Find with comparison operators
+findone {"age": {"$gt": 25, "$lt": 50}}
+
+# Find with logical operators
+findone {"$or": [{"status": "active"}, {"vip": true}]}
+
+# Find with array operators
+findone {"tags": {"$in": ["premium", "vip"]}}
+
+# Find with regex
+findone {"email": {"$regex": "@gmail.com$"}}
+
+# Find with nested objects
+findone {"profile.city": "New York"}
+
+# Distinct values
+distinct <field> [query]
+# Example: distinct email
+# Example: distinct age {"status": "active"}
+```
+
+##### **Git Operations Commands**
+
+```bash
+# Commit current changes
+commit -m "Add new user John Doe"
+
+# Push changes to remote
+push
+
+# Pull latest changes
+pull
+
+# Show Git status
+status
+
+# Show commit history
+log
+
+# Show specific commit
+show commit <hash>
+
+# Create new branch
+branch <name>
+# Example: branch feature-new-users
+
+# Switch to branch
+checkout <branch>
+# Example: checkout main
+
+# Merge branch
+merge <branch>
+# Example: merge feature-new-users
+
+# Show all branches
+show branches
+```
+
+##### **Utility Commands**
+
+```bash
+# Show help
+help
+
+# Show command help
+help <command>
+# Example: help insert
+
+# Clear screen
+clear
+
+# Exit shell
+exit
+
+# Show version
+version
+
+# Show system info
+info
+
+# Validate database
+validate
+
+# Repair database
+repair
+
+# Backup database
+backup
+
+# Restore from backup
+restore <file>
+```
+
+#### **Shell Examples and Workflows**
+
+##### **Complete User Management Workflow**
+
+```bash
+# Start shell
+gitdb shell
+
+# Configure environment
+set token ghp_your_token_here
+set owner yourusername
+set repo user-database
+
+# Create users collection
+create-collection users
+
+# Switch to users collection
+use users
+
+# Add users
+insert {"name": "John Doe", "email": "john@example.com", "age": 30, "status": "active"}
+insert {"name": "Jane Smith", "email": "jane@example.com", "age": 25, "status": "active"}
+insert {"name": "Bob Johnson", "email": "bob@example.com", "age": 35, "status": "inactive"}
+
+# View all users
+show docs
+
+# Find specific user
+findone {"email": "john@example.com"}
+
+# Update user
+update john-doe {"age": 31, "vip": true}
+
+# Count active users
+count {"status": "active"}
+
+# Commit changes
+commit -m "Add new users and update John's status"
+
+# Push to remote
+push
+```
+
+##### **E-commerce Database Setup**
+
+```bash
+# Start shell
+gitdb shell
+
+# Configure
+set token ghp_your_token_here
+set owner yourusername
+set repo ecommerce-db
+
+# Create collections
+create-collection products
+create-collection orders
+create-collection customers
+
+# Add products
+use products
+insert {"name": "Laptop", "price": 999.99, "category": "electronics", "stock": 50}
+insert {"name": "Mouse", "price": 29.99, "category": "electronics", "stock": 100}
+insert {"name": "Keyboard", "price": 79.99, "category": "electronics", "stock": 75}
+
+# Add customers
+use customers
+insert {"name": "Alice Johnson", "email": "alice@example.com", "vip": true}
+insert {"name": "Charlie Brown", "email": "charlie@example.com", "vip": false}
+
+# Add orders
+use orders
+insert {"customer_id": "alice-johnson", "items": ["laptop-001"], "total": 999.99, "status": "completed"}
+insert {"customer_id": "charlie-brown", "items": ["mouse-001", "keyboard-001"], "total": 109.98, "status": "pending"}
+
+# Query examples
+use products
+findone {"category": "electronics", "price": {"$lt": 100}}
+
+use orders
+count {"status": "pending"}
+
+use customers
+distinct vip
+```
+
+##### **Blog Platform Setup**
+
+```bash
+# Start shell
+gitdb shell
+
+# Configure
+set token ghp_your_token_here
+set owner yourusername
+set repo blog-database
+
+# Create collections
+create-collection posts
+create-collection comments
+create-collection authors
+
+# Add authors
+use authors
+insert {"name": "John Writer", "email": "john@blog.com", "bio": "Tech enthusiast"}
+insert {"name": "Sarah Blogger", "email": "sarah@blog.com", "bio": "Travel expert"}
+
+# Add posts
+use posts
+insert {"title": "Getting Started with GitDB", "author": "john@blog.com", "content": "GitDB is amazing...", "tags": ["database", "git"], "published": true}
+insert {"title": "Travel Tips for 2024", "author": "sarah@blog.com", "content": "Here are my top tips...", "tags": ["travel", "tips"], "published": false}
+
+# Add comments
+use comments
+insert {"post_id": "getting-started-with-gitdb", "author": "reader1@email.com", "content": "Great article!", "approved": true}
+insert {"post_id": "getting-started-with-gitdb", "author": "reader2@email.com", "content": "Very helpful", "approved": false}
+
+# Query examples
+use posts
+findone {"published": true, "tags": {"$in": ["database"]}}
+
+use comments
+count {"approved": true}
+
+use authors
+findone {"name": "John Writer"}
+```
+
+#### **Shell Configuration and Customization**
+
+##### **Shell Configuration File**
+
+Create `~/.gitdb/shell-config.json`:
+
+```json
+{
+  "default_owner": "yourusername",
+  "default_repo": "my-database",
+  "auto_commit": true,
+  "commit_message_template": "Update {collection}: {operation}",
+  "prompt_template": "gitdb:{collection}> ",
+  "history_file": "~/.gitdb/shell-history",
+  "max_history": 1000,
+  "colors": {
+    "prompt": "green",
+    "success": "green",
+    "error": "red",
+    "warning": "yellow",
+    "info": "blue"
+  },
+  "aliases": {
+    "ls": "show docs",
+    "cd": "use",
+    "pwd": "show current",
+    "count": "count",
+    "find": "findone"
+  }
+}
+```
+
+##### **Shell Scripts and Automation**
+
+```bash
+#!/bin/bash
+# backup-database.sh
+
+echo "Starting database backup..."
+
+# Start GitDB shell and run commands
+gitdb shell << EOF
+set token $GITHUB_TOKEN
+set owner yourusername
+set repo my-database
+
+# Create backup
+backup
+
+# Show backup info
+show backups
+
+exit
+EOF
+
+echo "Backup completed!"
+```
+
+```bash
+#!/bin/bash
+# sync-database.sh
+
+echo "Syncing database..."
+
+gitdb shell << EOF
+set token $GITHUB_TOKEN
+set owner yourusername
+set repo my-database
+
+# Pull latest changes
+pull
+
+# Show status
+status
+
+exit
+EOF
+
+echo "Sync completed!"
+```
+
+---
+
+## GitDB Server: REST API and GraphQL Interface {#server-interface}
+
+### 🎯 **Complete Server Setup and Usage**
+
+The GitDB server provides a REST API and GraphQL interface, allowing you to access your database through HTTP requests. This is perfect for web applications, mobile apps, and microservices.
+
+#### **Starting the Server**
+
+```bash
+# Start server with default settings
+gitdb server
+
+# Start on specific port
+gitdb server --port 8080
+
+# Start with specific host
+gitdb server --host 0.0.0.0
+
+# Start with configuration file
+gitdb server --config server-config.json
+
+# Start in development mode
+gitdb server --dev
+
+# Start with SSL
+gitdb server --ssl --cert cert.pem --key key.pem
+
+# Start with authentication
+gitdb server --auth --token-file tokens.json
+```
+
+#### **Server Configuration**
+
+Create `server-config.json`:
+
+```json
+{
+  "port": 7896,
+  "host": "localhost",
+  "cors": {
+    "enabled": true,
+    "origins": ["http://localhost:3000", "https://myapp.com"],
+    "methods": ["GET", "POST", "PUT", "DELETE"],
+    "headers": ["Content-Type", "Authorization"]
+  },
+  "authentication": {
+    "enabled": true,
+    "type": "token",
+    "tokens": ["ghp_your_token_here"]
+  },
+  "rate_limiting": {
+    "enabled": true,
+    "requests_per_minute": 100,
+    "burst_size": 20
+  },
+  "logging": {
+    "level": "info",
+    "file": "server.log",
+    "max_size": "10MB",
+    "max_files": 5
+  },
+  "repositories": {
+    "default": {
+      "owner": "yourusername",
+      "repo": "my-database",
+      "token": "ghp_your_token_here"
+    },
+    "analytics": {
+      "owner": "yourusername", 
+      "repo": "analytics-db",
+      "token": "ghp_your_token_here"
+    }
+  },
+  "graphql": {
+    "enabled": true,
+    "playground": true,
+    "introspection": true
+  },
+  "health_check": {
+    "enabled": true,
+    "endpoint": "/health",
+    "interval": 30
+  }
+}
+```
+
+#### **REST API Reference**
+
+##### **Base URL**
+```
+http://localhost:7896/api/v1
+```
+
+##### **Authentication**
+```http
+Authorization: Bearer ghp_your_github_token_here
+```
+
+##### **Collections Endpoints**
+
+```http
+# List all collections
+GET /collections
+Authorization: Bearer <token>
+
+Response:
+{
+  "collections": [
+    {
+      "name": "users",
+      "count": 150,
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "name": "products", 
+      "count": 75,
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
+
+# Create new collection
+POST /collections
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "new-collection"
+}
+
+Response:
+{
+  "name": "new-collection",
+  "created": true,
+  "message": "Collection created successfully"
+}
+
+# Delete collection
+DELETE /collections/{name}
+Authorization: Bearer <token>
+
+Response:
+{
+  "deleted": true,
+  "message": "Collection deleted successfully"
+}
+```
+
+##### **Documents Endpoints**
+
+```http
+# List documents in collection
+GET /collections/{name}
+Authorization: Bearer <token>
+
+Query Parameters:
+- limit: Number of documents to return (default: 50)
+- offset: Number of documents to skip (default: 0)
+- sort: Field to sort by (default: _id)
+- order: Sort order (asc/desc, default: asc)
+
+Example:
+GET /collections/users?limit=10&offset=0&sort=name&order=asc
+
+Response:
+{
+  "documents": [
+    {
+      "id": "john-doe",
+      "data": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "age": 30
+      },
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "total": 150,
+  "limit": 10,
+  "offset": 0
+}
+
+# Insert document
+POST /collections/{name}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "age": 25
+}
+
+Response:
+{
+  "id": "jane-smith",
+  "data": {
+    "name": "Jane Smith",
+    "email": "jane@example.com",
+    "age": 25
+  },
+  "created_at": "2024-01-15T10:30:00Z",
+  "message": "Document created successfully"
+}
+
+# Get document by ID
+GET /collections/{name}/{id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "id": "john-doe",
+  "data": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 30
+  },
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z"
+}
+
+# Update document
+PUT /collections/{name}/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "age": 31,
+  "status": "premium"
+}
+
+Response:
+{
+  "id": "john-doe",
+  "data": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 31,
+    "status": "premium"
+  },
+  "updated_at": "2024-01-15T10:30:00Z",
+  "message": "Document updated successfully"
+}
+
+# Delete document
+DELETE /collections/{name}/{id}
+Authorization: Bearer <token>
+
+Response:
+{
+  "deleted": true,
+  "message": "Document deleted successfully"
+}
+```
+
+##### **Query Endpoints**
+
+```http
+# Find documents by query
+POST /collections/{name}/find
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "query": {
+    "age": {"$gt": 25},
+    "status": "active"
+  },
+  "limit": 10,
+  "offset": 0,
+  "sort": {"name": 1}
+}
+
+Response:
+{
+  "documents": [
+    {
+      "id": "john-doe",
+      "data": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "age": 30,
+        "status": "active"
+      }
+    }
+  ],
+  "total": 45,
+  "limit": 10,
+  "offset": 0
+}
+
+# Find one document
+POST /collections/{name}/findone
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "query": {
+    "email": "john@example.com"
+  }
+}
+
+Response:
+{
+  "id": "john-doe",
+  "data": {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 30
+  }
+}
+
+# Count documents
+GET /collections/{name}/count
+Authorization: Bearer <token>
+
+Query Parameters:
+- query: JSON query string (URL encoded)
+
+Example:
+GET /collections/users/count?query=%7B%22status%22%3A%22active%22%7D
+
+Response:
+{
+  "count": 45,
+  "collection": "users"
+}
+
+# Distinct values
+GET /collections/{name}/distinct/{field}
+Authorization: Bearer <token>
+
+Query Parameters:
+- query: JSON query string (URL encoded)
+
+Example:
+GET /collections/users/distinct/status?query=%7B%22age%22%3A%7B%22%24gt%22%3A25%7D%7D
+
+Response:
+{
+  "field": "status",
+  "values": ["active", "inactive", "premium"],
+  "count": 3
+}
+```
+
+##### **Batch Operations Endpoints**
+
+```http
+# Batch insert
+POST /collections/{name}/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "documents": [
+    {
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "age": 28
+    },
+    {
+      "name": "Bob Smith",
+      "email": "bob@example.com",
+      "age": 32
+    }
+  ]
+}
+
+Response:
+{
+  "inserted": 2,
+  "ids": ["alice-johnson", "bob-smith"],
+  "message": "Batch insert completed"
+}
+
+# Batch update
+PUT /collections/{name}/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "query": {
+    "status": "inactive"
+  },
+  "update": {
+    "status": "active",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+
+Response:
+{
+  "updated": 15,
+  "message": "Batch update completed"
+}
+
+# Batch delete
+DELETE /collections/{name}/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "query": {
+    "status": "deleted"
+  }
+}
+
+Response:
+{
+  "deleted": 8,
+  "message": "Batch delete completed"
+}
+```
+
+##### **System Endpoints**
+
+```http
+# Health check
+GET /health
+
+Response:
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "version": "1.0.0",
+  "uptime": 3600
+}
+
+# Server info
+GET /info
+
+Response:
+{
+  "name": "GitDB Server",
+  "version": "1.0.0",
+  "node_version": "18.0.0",
+  "platform": "linux",
+  "memory_usage": {
+    "rss": 52428800,
+    "heapTotal": 20971520,
+    "heapUsed": 10485760
+  }
+}
+
+# Server stats
+GET /stats
+
+Response:
+{
+  "requests": {
+    "total": 1500,
+    "per_minute": 25,
+    "errors": 5
+  },
+  "collections": {
+    "total": 5,
+    "documents": 1250
+  },
+  "performance": {
+    "avg_response_time": 150,
+    "slowest_query": 500
+  }
+}
+```
+
+#### **GraphQL API Reference**
+
+##### **GraphQL Endpoint**
+```
+http://localhost:7896/graphql
+```
+
+##### **GraphQL Playground**
+```
+http://localhost:7896/graphql-playground
+```
+
+##### **Complete Schema**
+
+```graphql
+scalar JSON
+scalar DateTime
+
+type Document {
+  id: ID!
+  data: JSON!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Collection {
+  name: String!
+  documents: [Document!]!
+  count: Int!
+}
+
+type QueryResult {
+  documents: [Document!]!
+  total: Int!
+  limit: Int!
+  offset: Int!
+}
+
+type MutationResult {
+  success: Boolean!
+  message: String!
+  id: ID
+  count: Int
+}
+
+type Query {
+  # Collection queries
+  collections: [Collection!]!
+  collection(name: String!): Collection
+  
+  # Document queries
+  document(collection: String!, id: ID!): Document
+  documents(
+    collection: String!
+    limit: Int = 50
+    offset: Int = 0
+    sort: String
+    order: String = "asc"
+  ): QueryResult!
+  
+  # Search queries
+  find(
+    collection: String!
+    query: JSON
+    limit: Int = 50
+    offset: Int = 0
+    sort: JSON
+  ): QueryResult!
+  
+  findOne(
+    collection: String!
+    query: JSON
+  ): Document
+  
+  # Aggregation queries
+  count(
+    collection: String!
+    query: JSON
+  ): Int!
+  
+  distinct(
+    collection: String!
+    field: String!
+    query: JSON
+  ): [JSON!]!
+  
+  # System queries
+  health: JSON!
+  info: JSON!
+  stats: JSON!
+}
+
+type Mutation {
+  # Collection mutations
+  createCollection(name: String!): MutationResult!
+  deleteCollection(name: String!): MutationResult!
+  
+  # Document mutations
+  insert(
+    collection: String!
+    document: JSON!
+  ): Document!
+  
+  update(
+    collection: String!
+    id: ID!
+    document: JSON!
+  ): Document!
+  
+  delete(
+    collection: String!
+    id: ID!
+  ): MutationResult!
+  
+  # Batch mutations
+  insertMany(
+    collection: String!
+    documents: [JSON!]!
+  ): [Document!]!
+  
+  updateMany(
+    collection: String!
+    query: JSON!
+    update: JSON!
+  ): MutationResult!
+  
+  deleteMany(
+    collection: String!
+    query: JSON!
+  ): MutationResult!
+}
+
+type Subscription {
+  documentChanged(collection: String!): Document!
+  collectionChanged: Collection!
+}
+```
+
+##### **GraphQL Examples**
+
+```graphql
+# Get all collections
+query GetCollections {
+  collections {
+    name
+    count
+    created_at
+  }
+}
+
+# Get documents from collection
+query GetUsers($limit: Int, $offset: Int) {
+  documents(collection: "users", limit: $limit, offset: $offset) {
+    documents {
+      id
+      data
+      created_at
+      updated_at
+    }
+    total
+    limit
+    offset
+  }
+}
+
+# Find documents by query
+query FindActiveUsers {
+  find(collection: "users", query: { status: "active" }) {
+    documents {
+      id
+      data
+    }
+    total
+  }
+}
+
+# Find one document
+query FindUserByEmail($email: String!) {
+  findOne(collection: "users", query: { email: $email }) {
+    id
+    data
+  }
+}
+
+# Count documents
+query CountActiveUsers {
+  count(collection: "users", query: { status: "active" })
+}
+
+# Insert document
+mutation CreateUser($userData: JSON!) {
+  insert(collection: "users", document: $userData) {
+    id
+    data
+    created_at
+  }
+}
+
+# Update document
+mutation UpdateUser($id: ID!, $updateData: JSON!) {
+  update(collection: "users", id: $id, document: $updateData) {
+    id
+    data
+    updated_at
+  }
+}
+
+# Delete document
+mutation DeleteUser($id: ID!) {
+  delete(collection: "users", id: $id) {
+    success
+    message
+  }
+}
+
+# Batch operations
+mutation BatchInsertUsers($users: [JSON!]!) {
+  insertMany(collection: "users", documents: $users) {
+    id
+    data
+  }
+}
+
+# Complex queries
+query ComplexUserQuery {
+  find(
+    collection: "users"
+    query: {
+      age: { _gt: 25, _lt: 50 }
+      status: "active"
+      tags: { _in: ["premium", "vip"] }
+    }
+    limit: 10
+    sort: { name: 1 }
+  ) {
+    documents {
+      id
+      data
+    }
+    total
+  }
+}
+```
+
+#### **JavaScript Client Examples**
+
+```javascript
+// REST API Client
+class GitDBRestClient {
+  constructor(baseURL, token) {
+    this.baseURL = baseURL;
+    this.token = token;
+  }
+
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    };
+
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  // Collection operations
+  async getCollections() {
+    return this.request('/collections');
+  }
+
+  async createCollection(name) {
+    return this.request('/collections', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    });
+  }
+
+  // Document operations
+  async getDocuments(collection, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/collections/${collection}?${query}`);
+  }
+
+  async insertDocument(collection, document) {
+    return this.request(`/collections/${collection}`, {
+      method: 'POST',
+      body: JSON.stringify(document)
+    });
+  }
+
+  async getDocument(collection, id) {
+    return this.request(`/collections/${collection}/${id}`);
+  }
+
+  async updateDocument(collection, id, update) {
+    return this.request(`/collections/${collection}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(update)
+    });
+  }
+
+  async deleteDocument(collection, id) {
+    return this.request(`/collections/${collection}/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // Query operations
+  async find(collection, query, params = {}) {
+    return this.request(`/collections/${collection}/find`, {
+      method: 'POST',
+      body: JSON.stringify({ query, ...params })
+    });
+  }
+
+  async findOne(collection, query) {
+    return this.request(`/collections/${collection}/findone`, {
+      method: 'POST',
+      body: JSON.stringify({ query })
+    });
+  }
+
+  async count(collection, query = null) {
+    const params = query ? { query: JSON.stringify(query) } : {};
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/collections/${collection}/count?${queryString}`);
+  }
+}
+
+// Usage example
+const client = new GitDBRestClient('http://localhost:7896/api/v1', 'ghp_your_token');
+
+// Insert user
+const user = await client.insertDocument('users', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30
+});
+
+// Find users
+const activeUsers = await client.find('users', { status: 'active' });
+
+// Update user
+await client.updateDocument('users', user.id, { age: 31 });
+```
+
+```javascript
+// GraphQL Client
+class GitDBGraphQLClient {
+  constructor(endpoint, token) {
+    this.endpoint = endpoint;
+    this.token = token;
+  }
+
+  async query(query, variables = {}) {
+    const response = await fetch(this.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: JSON.stringify({
+        query,
+        variables
+      })
+    });
+
+    const result = await response.json();
+    if (result.errors) {
+      throw new Error(result.errors[0].message);
+    }
+    return result.data;
+  }
+
+  // Collection operations
+  async getCollections() {
+    const query = `
+      query {
+        collections {
+          name
+          count
+          created_at
+        }
+      }
+    `;
+    return this.query(query);
+  }
+
+  // Document operations
+  async getDocuments(collection, limit = 50, offset = 0) {
+    const query = `
+      query GetDocuments($collection: String!, $limit: Int, $offset: Int) {
+        documents(collection: $collection, limit: $limit, offset: $offset) {
+          documents {
+            id
+            data
+            created_at
+            updated_at
+          }
+          total
+          limit
+          offset
+        }
+      }
+    `;
+    return this.query(query, { collection, limit, offset });
+  }
+
+  async insertDocument(collection, document) {
+    const query = `
+      mutation InsertDocument($collection: String!, $document: JSON!) {
+        insert(collection: $collection, document: $document) {
+          id
+          data
+          created_at
+        }
+      }
+    `;
+    return this.query(query, { collection, document });
+  }
+
+  async findDocuments(collection, query, limit = 50, offset = 0) {
+    const graphqlQuery = `
+      query FindDocuments($collection: String!, $query: JSON, $limit: Int, $offset: Int) {
+        find(collection: $collection, query: $query, limit: $limit, offset: $offset) {
+          documents {
+            id
+            data
+          }
+          total
+        }
+      }
+    `;
+    return this.query(graphqlQuery, { collection, query, limit, offset });
+  }
+}
+
+// Usage example
+const gqlClient = new GitDBGraphQLClient('http://localhost:7896/graphql', 'ghp_your_token');
+
+// Insert user
+const result = await gqlClient.insertDocument('users', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 30
+});
+
+// Find active users
+const activeUsers = await gqlClient.findDocuments('users', { status: 'active' });
+```
+
+#### **Server Management and Monitoring**
+
+##### **Process Management**
+
+```bash
+# Start server in background
+nohup gitdb server > server.log 2>&1 &
+
+# Check if server is running
+ps aux | grep gitdb
+
+# Stop server
+pkill -f "gitdb server"
+
+# Restart server
+pkill -f "gitdb server" && gitdb server
+```
+
+##### **Logging and Monitoring**
+
+```bash
+# View server logs
+tail -f server.log
+
+# Monitor server performance
+watch -n 5 'curl -s http://localhost:7896/stats | jq'
+
+# Check server health
+curl -s http://localhost:7896/health | jq
+
+# Monitor memory usage
+watch -n 5 'curl -s http://localhost:7896/info | jq .memory_usage'
+```
+
+##### **Load Balancing**
+
+```nginx
+# Nginx configuration for load balancing
+upstream gitdb_servers {
+    server localhost:7896;
+    server localhost:7897;
+    server localhost:7898;
+}
+
+server {
+    listen 80;
+    server_name api.gitdb.com;
+
+    location / {
+        proxy_pass http://gitdb_servers;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+---
+
+## Advanced Server Features {#advanced-server}
+
+### **WebSocket Support for Real-time Updates**
+
+```javascript
+// WebSocket connection for real-time updates
+const ws = new WebSocket('ws://localhost:7896/ws');
+
+ws.onopen = () => {
+  console.log('Connected to GitDB WebSocket');
+  
+  // Subscribe to collection changes
+  ws.send(JSON.stringify({
+    type: 'subscribe',
+    collection: 'users'
+  }));
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  
+  switch (data.type) {
+    case 'document_changed':
+      console.log('Document changed:', data.document);
+      break;
+    case 'collection_changed':
+      console.log('Collection changed:', data.collection);
+      break;
+    case 'error':
+      console.error('WebSocket error:', data.error);
+      break;
+  }
+};
+
+ws.onclose = () => {
+  console.log('Disconnected from GitDB WebSocket');
+};
+```
+
+### **Server Clustering**
+
+```javascript
+// Cluster configuration
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+
+  // Fork workers
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork(); // Replace dead worker
+  });
+} else {
+  // Worker process
+  require('./server.js');
+  console.log(`Worker ${process.pid} started`);
+}
+```
+
+---
+
+## Custom Extensions {#custom-extensions}
+
+### **Building Custom GitDB Extensions**
+
+GitDB supports custom extensions for specialized functionality:
+
+#### **Extension Structure**
+
+```javascript
+// my-extension.js
+class MyGitDBExtension {
+  constructor(client) {
+    this.client = client;
+  }
+
+  async customMethod(collection, data) {
+    // Custom logic here
+    const result = await this.client.insert(collection, data);
+    return this.processResult(result);
+  }
+
+  processResult(result) {
+    // Custom processing
+    return {
+      ...result,
+      processed: true,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+module.exports = MyGitDBExtension;
+```
+
+#### **Using Extensions**
+
+```javascript
+const GitDBClient = require('gitdb-client');
+const MyExtension = require('./my-extension');
+
+const client = new GitDBClient({
+  owner: 'yourusername',
+  repo: 'my-database',
+  token: 'your-token'
+});
+
+// Add extension
+client.use(new MyExtension(client));
+
+// Use custom method
+const result = await client.customMethod('users', { name: 'John' });
+```
+
+---
+
 ## Conclusion
 
 GitDB represents a paradigm shift in database technology, combining the reliability and versioning capabilities of Git with the flexibility and power of modern document databases. Whether you're building a small application or a large-scale system, GitDB provides the tools and features you need to succeed.
@@ -2642,16 +4248,16 @@ GitDB represents a paradigm shift in database technology, combining the reliabil
 
 ### Getting Started
 
-1. **Install GitDB CLI**: `npm install -g gitdb-cli`
-2. **Initialize your first database**: `gitdb init my-database`
-3. **Choose your SDK**: JavaScript, Python, Go, Rust, PHP, or Ruby
-4. **Start building**: Use the examples and best practices in this guide
+1. **Create GitHub Repository**: Go to GitHub.com and create a new private repository
+2. **Generate GitHub Token**: Create a personal access token with `repo` permissions
+3. **Install GitDB CLI**: `npm install -g gitdb-database`
+4. **Connect to Database**: `gitdb connect -t <token> -o <owner> -r <repo>`
+5. **Choose your SDK**: JavaScript, Python, Go, Rust, PHP, or Ruby
+6. **Start building**: Use the examples and best practices in this guide
 
 ### Community & Support
 
-- **GitHub**: [https://github.com/yourusername/gitdb](https://github.com/karthikeyanV2K/gitdb)
-- **Documentation**: [https://gitdb.dev/docs](https://gitdb.dev/docs)
-- **Discord**: [https://discord.gg/gitdb](https://discord.gg/gitdb)
+- **GitHub**: [https://github.com/youru/gitdb](https://github.com/karthikeyanV2K/gitdb)
 - **Issues**: [https://github.com/yourusername/gitdb/issues](https://github.com/karthikeyanV2K/gitdb/issues)
 
 ### Contributing
@@ -2671,3 +4277,5 @@ GitDB is open source and welcomes contributions:
 
 ---
 
+*Last updated: July 2025*
+*Version: 2.2.1* 

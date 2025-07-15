@@ -4257,8 +4257,8 @@ GitDB represents a paradigm shift in database technology, combining the reliabil
 
 ### Community & Support
 
-- **GitHub**: [https://github.com/youru/gitdb](https://github.com/karthikeyanV2K/gitdb)
-- **Issues**: [https://github.com/yourusername/gitdb/issues](https://github.com/karthikeyanV2K/gitdb/issues)
+- **GitHub**: [https://github.com/karthikeyanV2K/gitdb](https://github.com/karthikeyanV2K/gitdb)
+- **Issues**: [https://github.com/karthikeyanV2K/gitdb/issues](https://github.com/karthikeyanV2K/gitdb/issues)
 
 ### Contributing
 
